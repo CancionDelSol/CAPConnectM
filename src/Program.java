@@ -49,8 +49,8 @@ public class Program {
 
     private static boolean GameBoardPlacePieceTest() {
         int n = 5;
-        int m = 3; // indexed starting at 0
-        int col = 4;
+        int m = 3;
+        int col = 3; // indexed starting at 0
         char playerPiece = 'X';
 
         Gameboard newBoard = new Gameboard(n, m);
