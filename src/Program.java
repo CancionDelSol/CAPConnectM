@@ -58,9 +58,14 @@ public class Program {
         newBoard.PlacePlayerPiece(col, newTestHumanPlayer);
 
         // Piece should be at index 23
-        if (newBoard.getBoard()[23] != playerPiece) {
-            return false;
+        try {
+            if (newBoard.getBoard()[23] == playerPiece) {
+                return true;
+            }
+        } catch (Exception exc) {
+            exc.printStackTrace();
         }
-        return true;
+        
+        return false;
     }
 }
