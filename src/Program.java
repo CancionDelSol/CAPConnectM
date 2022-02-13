@@ -8,7 +8,7 @@ public class Program {
     //region Main Entry
     public static void main(String[] args) { 
         // Special argument to run tests, then exit
-        if (args[0] == 't') {
+        if (args[0].equals("t")) {
             RunTests();
             return;
         }
