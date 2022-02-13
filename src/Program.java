@@ -1,7 +1,18 @@
 public class Program {
+    //region Fields
     private Gameboard _gameBoard = null;
+    private IPlayer _playerOne = null;
+    private IPlayer _playerTow = null;
+    //endregion
+
+    //region Main Entry
     public static void main(String[] args) { 
-        
+        // Special argument to run tests, then exit
+        if (args[0] == 't') {
+            RunTests();
+            return;
+        }
+
         // TODO : Set up Gameboard based on command
         //         line arguments
         
@@ -14,12 +25,18 @@ public class Program {
         //        board. The board will wait for commands and 
         //        print the layout and request input from user
         //        if required
-
-        // Print hello world
-        GameBoardConstructorTest();
     }
+    //endregion
 
     // Test Scripts
+    private static void RunTests() {
+        boolean resOne = GameBoardConstructorTest();
+        boolean resTwo = GameBoardPlacePieceTest();
+
+        System.out.println(resOne + " | GameBoardConstructorTest");
+        System.out.println(resTwo + " | GameBoardPlacePieceTest");
+
+    }
     private static boolean GameBoardConstructorTest() {
         int n = 5;
         int m = 3;
@@ -28,5 +45,14 @@ public class Program {
         if (newBoard.getBoard().length != n*n)
             return false;
         return true;
+    }
+
+    private static boolean GameBoardPlacePieceTest() {
+        int n = 5;
+        int m = 3;
+        int col = 4;
+        char playerPiece = 'X';
+
+        Gameboard newBoard = new Gameboard(n, m);
     }
 }
