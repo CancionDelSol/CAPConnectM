@@ -1,8 +1,8 @@
 #Prepare environment
 echo "Preparing environment"
-mkdir src/build
-mkdir src/build/classes
-mkdir src/package
+[ -d "/path/dir/" ] && mkdir src/build
+[ -d "/path/dir/" ] && mkdir mkdir src/build/classes
+[ -d "/path/dir/" ] && mkdir mkdir src/package
 cp src/*.java src/package/
 
 # Create class intermediates
@@ -21,9 +21,9 @@ cp src/build/ConnectM.jar ConnectM.jar
 
 # Clean up intermediates
 echo "Cleaning Up"
-rm -r src/build
+rm src/build/classes/*
 rm src/myManifest
-rm -r src/package
+rm src/package/*
 
 # Start program
 echo "Starting program"
