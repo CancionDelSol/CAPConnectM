@@ -9,22 +9,22 @@ cp src/*.java src/package/
 echo "Creating class intermediates"
 javac -sourcepath src -d src/build/classes src/package/*.java
 
-#java -classpath build/classes/ Program
-ls
+echo "Executing from classes"
+#java -classpath src/build/classes/ Program
+
 echo "Creating manifest"
 echo Main-Class: Program>src/myManifest
 
 echo "Creating jar"
-jar cfm src/build/ConnectM.jar src/myManifest -C src/build/classes/ src/
+jar cfm src/build/ConnectM.jar src/myManifest -C src/build/classes/ .
 cp src/build/ConnectM.jar ConnectM.jar
 
 # Clean up intermediates
 echo "Cleaning Up"
-rm -r src/build
-rm src/myManifest
-rm -r src/package
+#rm -r src/build
+#rm src/myManifest
+#rm -r src/package
 
 # Start program
 echo "Starting program"
 java -jar ConnectM.jar
-
