@@ -61,6 +61,9 @@ public class Program {
         try {
             if (newBoard.getBoard()[23] == playerPiece) {
                 return true;
+            } else {
+                System.out.println("Fail GameBoardPlacePieceTest");
+                newBoard.DisplayGameBoard();
             }
         } catch (Exception exc) {
             exc.printStackTrace();

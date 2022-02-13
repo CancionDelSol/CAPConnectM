@@ -51,7 +51,17 @@ public class Gameboard {
      * +---+---+---+---+---+ 
     */
     public void DisplayGameBoard() {
-        // TODO
+        for (int i = 0; i < _n * _n; i++) {
+            if (i % _n == 0) {
+                if (i > 0) {
+                    System.out.println(DIVIDER);
+
+                System.out.println(DIVIDING_ROW);
+            }
+            
+            System.out.print(DIVIDER);
+            System.out.print(_board[i]);
+        }
     }
 
     /**
