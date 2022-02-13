@@ -49,10 +49,18 @@ public class Program {
 
     private static boolean GameBoardPlacePieceTest() {
         int n = 5;
-        int m = 3;
+        int m = 3; // indexed starting at 0
         int col = 4;
         char playerPiece = 'X';
 
         Gameboard newBoard = new Gameboard(n, m);
+        IPlayer newTestHumanPlayer = new HumanPlayer('X');
+        newBoard.PlacePlayerPiece(col, newTestHumanPlayer);
+
+        // Piece should be at index 23
+        if (newBoard.getBoard()[23] != playerPiece) {
+            return false;
+        }
+        return true;
     }
 }
