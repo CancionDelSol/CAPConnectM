@@ -1,9 +1,10 @@
 public class Program {
+    private Gameboard _gameBoard = null;
     public static void main(String[] args) { 
         
         // TODO : Set up Gameboard based on command
         //         line arguments
-
+        
 
         // TODO : Create message publisher
         //         in order to send moves
@@ -14,8 +15,18 @@ public class Program {
         //        print the layout and request input from user
         //        if required
 
-
         // Print hello world
-        System.out.println("Hello, World");
+        GameBoardConstructorTest();
+    }
+
+    // Test Scripts
+    private static boolean GameBoardConstructorTest() {
+        int n = 5;
+        int m = 3;
+
+        Gameboard newBoard = new Gameboard(n, m);
+        if (newBoard.getBoard().size() != n*n)
+            return false;
+        return true;
     }
 }
