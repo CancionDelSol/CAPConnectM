@@ -1,8 +1,8 @@
 #Prepare environment
 echo "Preparing environment"
-[ -d "/path/dir/" ] && mkdir src/build
-[ -d "/path/dir/" ] && mkdir mkdir src/build/classes
-[ -d "/path/dir/" ] && mkdir mkdir src/package
+![ -d "/path/dir/" ] && mkdir src/build
+![ -d "/path/dir/" ] && mkdir mkdir src/build/classes
+![ -d "/path/dir/" ] && mkdir mkdir src/package
 cp src/*.java src/package/
 
 # Create class intermediates
