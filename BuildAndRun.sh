@@ -21,9 +21,9 @@ cp src/build/ConnectM.jar ConnectM.jar
 
 # Clean up intermediates
 echo "Cleaning Up"
-#rm -r src/build
-#rm src/myManifest
-#rm -r src/package
+-r src/build
+src/myManifest
+-r src/package
 
 # Start program
 echo "Starting program"
