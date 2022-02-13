@@ -1,3 +1,5 @@
+import java.util.Random;
+
 public class HumanPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();

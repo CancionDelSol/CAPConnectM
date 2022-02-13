@@ -8,7 +8,7 @@ public class Gameboard {
     //region Constants
     private static final String DIVIDING_ROW = "+---+---+---+---+---+";
     private static final String DIVIDER = "|";
-    private static final STring EMPTY = " ";
+    private static final String EMPTY = " ";
     //endregion
 
     //region Fields
