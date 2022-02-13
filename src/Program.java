@@ -25,7 +25,7 @@ public class Program {
         int m = 3;
 
         Gameboard newBoard = new Gameboard(n, m);
-        if (newBoard.getBoard().size() != n*n)
+        if (newBoard.getBoard().length != n*n)
             return false;
         return true;
     }
