@@ -1,12 +1,12 @@
 # Prepare environment
 echo "Preparing environment"
-if ! [ $(-d "/src/build/") ] ; then
+if ! [ -d "/src/build/" ] ; then
     mkdir src/build
 fi
-if ! [ $(-d "/src/build/classes") ] ; then
+if ! [ -d "/src/build/classes" ] ; then
     mkdir src/build/classes
 fi
-if ! [ $(-d "/src/package") ] ; then
+if ! [ -d "/src/package" ] ; then
     mkdir src/package
 fi
 #![ -d "/path/dir/" ] || mkdir src/build
