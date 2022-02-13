@@ -1,6 +1,6 @@
 #Prepare environment
 echo "Preparing environment"
-mkdir src/build/
+mkdir src/build
 mkdir src/build/classes
 mkdir src/package
 cp src/*.java src/package/
