@@ -60,7 +60,7 @@ public class Gameboard {
             }
             
             System.out.print(DIVIDER);
-            System.out.print(_board[i]);
+            System.out.print(" " + _board[i] + " ");
         }
     }
 
