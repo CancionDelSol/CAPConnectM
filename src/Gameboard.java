@@ -63,6 +63,7 @@ public class Gameboard {
             System.out.print(" " + _board[i] + " ");
         }
         System.out.println(DIVIDER);
+        System.out.println(DIVIDING_ROW);
     }
 
     /**
