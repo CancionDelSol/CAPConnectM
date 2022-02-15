@@ -59,7 +59,7 @@ public class Program {
 
         // Piece should be at index 23
         try {
-            if (newBoard.getBoard()[22] == playerPiece) { //23
+            if (newBoard.getBoard()[23] == playerPiece) { 
                 return true;
             } else {
                 System.out.println("Fail GameBoardPlacePieceTest");
