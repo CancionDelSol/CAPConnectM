@@ -137,6 +137,7 @@ public class Program {
             if(!newBoard.PlacePlayerPiece(i%n, playerOne))
                 return false;
         }
+        newBoard.DisplayGameBoard();
         return true;
     }
 }
