@@ -69,9 +69,11 @@ public class Program {
     private static void RunTests() {
         boolean resOne = GameBoardConstructorTest();
         boolean resTwo = GameBoardPlacePieceTest();
+        boolean resThree = GameBoardFillTest();
 
         System.out.println(resOne + " | GameBoardConstructorTest");
         System.out.println(resTwo + " | GameBoardPlacePieceTest");
+        System.out.println(resThree + " | GameBoardFillTest");
 
     }
 
@@ -119,5 +121,23 @@ public class Program {
         }
         
         return false;
+    }
+
+    private static boolean GameBoardFillTest() {
+        int n = 5;
+        int m = 3;
+        int col = 3; // indexed starting at 0
+        char playerPiece = 'X';
+
+        Gameboard newBoard = new Gameboard(n, m);
+        IPlayer playerOne = new HumanPlayer('X');
+        IPlayer playerTwo = new HumanPlayer('O');
+
+        // We can have a total of 5 * 5 = 25 total piece placements
+        for (int i = 0; i < n*n; i++) {
+            if(!newBoard.PlacePlayerPiece(i%n, newTestHumanPlayer))
+                return false;
+        }
+        return true;
     }
 }
