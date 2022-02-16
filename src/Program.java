@@ -15,7 +15,8 @@ public class Program {
 
         // TODO : Set up Gameboard based on command
         //         line arguments
-        
+        int n = Integer.parseInteger(args[0]);
+        int m = Integer.parseInteger(args[1]);
 
         // TODO : Create message publisher
         //         in order to send moves
@@ -29,6 +30,9 @@ public class Program {
     //endregion
 
     // Test Scripts
+    /**
+     * Runs all available tests
+     */
     private static void RunTests() {
         boolean resOne = GameBoardConstructorTest();
         boolean resTwo = GameBoardPlacePieceTest();
@@ -37,6 +41,10 @@ public class Program {
         System.out.println(resTwo + " | GameBoardPlacePieceTest");
 
     }
+
+    /**
+     * Construct a gameboard successfully
+     */
     private static boolean GameBoardConstructorTest() {
         int n = 5;
         int m = 3;
@@ -47,6 +55,11 @@ public class Program {
         return true;
     }
 
+    /**
+     * Place a piece in a gameboard
+     * Checks for correct placement and value
+     * Checks recent move for player matches input
+     */
     private static boolean GameBoardPlacePieceTest() {
         int n = 5;
         int m = 3;
@@ -56,6 +69,9 @@ public class Program {
         Gameboard newBoard = new Gameboard(n, m);
         IPlayer newTestHumanPlayer = new HumanPlayer('X');
         newBoard.PlacePlayerPiece(col, newTestHumanPlayer);
+
+        if (newBoard.getLastMoveForPlayer(newTestHumanPlayer) != newTestHumanPlayer.getPlayerCharacter())
+            return false;
 
         // Piece should be at index 23
         try {

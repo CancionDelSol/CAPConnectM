@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /**
  * Game board class
  * Handles the game board matrix
@@ -13,12 +15,21 @@ public class Gameboard {
 
     //region Fields
     private char[] _board = null;
+    private HashMap<Character, Integer> _recentMoves = new HashMap<>();
     private int _n = 0;
     private int _goal = 0;
     //endregion
 
     //region Properties
     public char[] getBoard() { return _board; }
+
+    /**
+     * Return the last move by player with 
+     */
+    public int getLastMoveForPlayer(IPlayer player) {
+        if (_recentMoves.containsKey(player.getPlayerCharacter()))
+            return _recentMoves.get(player.getPlayerCharacter());
+    }
     public int getGoal() { return _goal; }
     public int getN() { return _n; }
     //endregion
@@ -77,6 +88,7 @@ public class Gameboard {
             int index = (_n * yIndex) + column;
             if (_board[index] == ' ') {
                 _board[index] = player.getPlayerCharacter();
+                _recentMoves.put(player.getPlayerCharacter(), column);
                 return true;
             }
         }
