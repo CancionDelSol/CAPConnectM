@@ -109,12 +109,12 @@ public class Program {
             return false;
 
         // Piece should be at index 23
+        newBoard.DisplayGameBoard();
         try {
             if (newBoard.getBoard()[23] == playerPiece) { 
                 return true;
             } else {
                 System.out.println("Fail GameBoardPlacePieceTest");
-                newBoard.DisplayGameBoard();
             }
         } catch (Exception exc) {
             exc.printStackTrace();
