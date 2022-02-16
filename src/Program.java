@@ -131,11 +131,10 @@ public class Program {
 
         Gameboard newBoard = new Gameboard(n, m);
         IPlayer playerOne = new HumanPlayer('X');
-        IPlayer playerTwo = new HumanPlayer('O');
 
         // We can have a total of 5 * 5 = 25 total piece placements
         for (int i = 0; i < n*n; i++) {
-            if(!newBoard.PlacePlayerPiece(i%n, newTestHumanPlayer))
+            if(!newBoard.PlacePlayerPiece(i%n, playerOne))
                 return false;
         }
         return true;
