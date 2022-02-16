@@ -93,7 +93,7 @@ public class Program {
         IPlayer newTestHumanPlayer = new HumanPlayer('X');
         newBoard.PlacePlayerPiece(col, newTestHumanPlayer);
 
-        if (newBoard.getLastMoveForPlayer(newTestHumanPlayer) != newTestHumanPlayer.getPlayerCharacter())
+        if (newBoard.getLastMoveForPlayer(newTestHumanPlayer) != col)
             return false;
 
         // Piece should be at index 23
