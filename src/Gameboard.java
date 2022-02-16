@@ -24,11 +24,13 @@ public class Gameboard {
     public char[] getBoard() { return _board; }
 
     /**
-     * Return the last move by player with 
+     * Return the last move by player
+     * Returns -1 for missing key
      */
     public int getLastMoveForPlayer(IPlayer player) {
         if (_recentMoves.containsKey(player.getPlayerCharacter()))
             return _recentMoves.get(player.getPlayerCharacter());
+        return -1;
     }
     public int getGoal() { return _goal; }
     public int getN() { return _n; }
