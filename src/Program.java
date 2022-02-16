@@ -58,7 +58,7 @@ public class Program {
         boolean gameComplete = false;
         do {
 
-        } while (!gameComplete)
+        } while (!gameComplete);
     }
     //endregion
 
