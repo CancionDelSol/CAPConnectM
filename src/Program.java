@@ -3,6 +3,7 @@ public class Program {
     private Gameboard _gameBoard = null;
     private IPlayer _playerOne = null;
     private IPlayer _playerTow = null;
+    private int _curPlayer = 0;
     //endregion
 
     //region Main Entry
@@ -13,19 +14,41 @@ public class Program {
             return;
         }
 
-        // TODO : Set up Gameboard based on command
-        //         line arguments
-        int n = Integer.parseInteger(args[0]);
-        int m = Integer.parseInteger(args[1]);
+        // Set up Gameboard based on command
+        //  line arguments
+        IPlayer playerOne = null;
+        IPlayer playerTwo = null;
+        int n = Integer.parseInt(args[0]);
+        int m = Integer.parseInt(args[1]);
+        int h = Integer.parseInt(args[2]);
+        String address = "";
+        if (args.length == 4)
+            address = args[3];
 
-        // TODO : Create message publisher
-        //         in order to send moves
+        // Here are the appropriate setups concerning 
+        //  players:
+        //   [Human, Computer] : if no ip address is given
+        //   [Computer, UDP] : if ip is present
+        //
+        //   In the first case, the cli argument "H" will
+        //    determine whether the Human goes first
+        //
+        //   In the latter case, the cli argument "H" will
+        //    determine whether the program is waiting for 
+        //    a UDP response first or sending a move first
 
-        // TODO : Create player objects (Human vs. Computer)
-        //        The player objects will send actions to the 
-        //        board. The board will wait for commands and 
-        //        print the layout and request input from user
-        //        if required
+        // There will always be a computer player
+        playerTwo = new ComputerPlayer('X');
+        
+        // Case UDP
+        if (!address.IsEmpty()) {
+            playerOne = playerTwo;
+            playerTwo = new UDPPlayer('O');
+        } else {
+            playerOne = new HumanPlayer('O');
+        }
+
+        // TODO : Start game loop
     }
     //endregion
 
