@@ -22,9 +22,10 @@ public class Program {
         int m = Integer.parseInt(args[1]);
         int h = Integer.parseInt(args[2]);
         String address = "";
-        if (args.length == 4)
+        if (args.length == 4) {
             address = args[3];
             System.out.println("Recognized IP address: " + address);
+        }
         else if (args.length == 5) {
             address = args[3] + ":" + args[4];
             System.out.println("Recognized IP address: " + address);
@@ -56,7 +57,7 @@ public class Program {
         // TODO : Start game loop
         boolean gameComplete = false;
         do {
-            
+
         } while (!gameComplete)
     }
     //endregion
