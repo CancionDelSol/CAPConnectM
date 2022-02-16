@@ -41,9 +41,9 @@ public class Program {
         playerTwo = new ComputerPlayer('X');
         
         // Case UDP
-        if (!address.IsEmpty()) {
+        if (!address.isEmpty()) {
             playerOne = playerTwo;
-            playerTwo = new UDPPlayer('O');
+            playerTwo = new UDPPlayer('O', address);
         } else {
             playerOne = new HumanPlayer('O');
         }
