@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.lang.StringBuilder;
 
 /**
  * Game board class
@@ -8,7 +9,7 @@ import java.util.HashMap;
  */
 public class Gameboard {
     //region Constants
-    private static final String DIVIDING_ROW = "+---+---+---+---+---+";
+    private static String DIVIDING_ROW = "+---+---+---+---+---+";
     private static final String DIVIDER = "|";
     private static final String EMPTY = " ";
     //endregion
@@ -44,6 +45,13 @@ public class Gameboard {
         for (int i = 0; i < n*n; i++) {
             _board[i] = ' ';
         }
+
+        StringBuilder bldr = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            bldr.append("+---");
+        }
+        bldr.append("+");
+        DIVIDING_ROW = bldr.toString();
         _goal = m;
     }
     //endregion
@@ -73,7 +81,7 @@ public class Gameboard {
             }
             
             System.out.print(DIVIDER);
-            System.out.print(" " + _board[i] + " ");
+            System.out.print(" " + _board[i] +  " ");
         }
         System.out.println(DIVIDER);
         System.out.println(DIVIDING_ROW);
@@ -85,6 +93,9 @@ public class Gameboard {
      * Origin starting in the top left corner
      */
     public boolean PlacePlayerPiece(int column, IPlayer player) {
+        if (column < 0)
+            return false;
+            
         // Get the largest available row
         for (int yIndex = _n - 1; yIndex > -1; yIndex--) {
             int index = (_n * yIndex) + column;

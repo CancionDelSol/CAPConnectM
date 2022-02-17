@@ -11,7 +11,8 @@ public class UDPPlayer implements IPlayer {
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
     private DatagramSocket _socket;
-    private InetAddress _address;
+    private InetAddress _localAddress;
+    private InetAddress _outgoingAddress;
     private byte[] _buffer;
     private int _port;
     //endregion
@@ -20,10 +21,20 @@ public class UDPPlayer implements IPlayer {
     //add try catch for error reporting? 
     
     //region Constructor
-    public UDPPlayer(char playerCharacter, int port) throws SocketException, UnknownHostException {
+    public UDPPlayer(char playerCharacter, int port)  throws SocketException, UnknownHostException {
+        this(playerCharacter, port, "");
+    }
+
+    public UDPPlayer(char playerCharacter, int port, String outgoingAddress) throws SocketException, UnknownHostException {
         _playerCharacter = playerCharacter;
-        _socket = new DatagramSocket();
-        _address = InetAddress.getByName("localhost");
+        _socket = new DatagramSocket(port);
+        _localAddress = InetAddress.getByName("localhost");
+
+        if (outgoingAddress.isEmpty())
+            _outgoingAddress = InetAddress.getByName("localhost");
+        else
+            _outgoingAddress = InetAddress.getByAddress(outgoingAddress, getRawAddress(outgoingAddress));
+            
         _port = port; 
     }
     //endregion
@@ -31,7 +42,7 @@ public class UDPPlayer implements IPlayer {
     //region IPlayer
     public int RequestMove(Gameboard board) {
         // TODO : Places random piece for now
-        return _rand.nextInt() % board.getN();
+        return Math.abs(_rand.nextInt()) % board.getN();
     }
 
     /**
@@ -47,7 +58,6 @@ public class UDPPlayer implements IPlayer {
      * receive oponents move and return(int)
      * @throws IOException 
      */
-    
     public int sendEcho(int column) throws IOException {
     	
     	String move = String.valueOf(column);
@@ -55,11 +65,11 @@ public class UDPPlayer implements IPlayer {
     	_buffer = move.getBytes();
     	
     	DatagramPacket packet 
-    		= new DatagramPacket(_buffer, _buffer.length, _address, _port);
+    		= new DatagramPacket(_buffer, _buffer.length, _outgoingAddress, _port);
     	
     	_socket.send(packet);
     	
-    	packet = new DatagramPacket(_buffer, _buffer.length);
+    	packet = new DatagramPacket(_buffer, _buffer.length, _localAddress, _port);
     	
     	_socket.receive(packet);
     	
@@ -68,5 +78,16 @@ public class UDPPlayer implements IPlayer {
     	int opponentMove = Integer.parseInt(received);
     	
     	return opponentMove;
+    }
+
+    private byte[] getRawAddress(String address) {
+        String[] addAndPort = address.split(":");
+        String[] intArray = addAndPort[0].split(".");
+
+        byte[] res = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            res[i] = (byte)(Integer.parseInt(intArray[i]) & 0xFF);
+        }
+        return res;
     }
 }

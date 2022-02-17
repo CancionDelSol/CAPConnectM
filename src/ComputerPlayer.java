@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.lang.Math;
 
 public class ComputerPlayer implements IPlayer {
     //region Fields
@@ -15,7 +16,7 @@ public class ComputerPlayer implements IPlayer {
     //region IPlayer
     public int RequestMove(Gameboard board) {
         // TODO : Places random piece for now
-        return _rand.nextInt() % board.getN();
+        return Math.abs(_rand.nextInt()) % board.getN();
     }
 
     /**

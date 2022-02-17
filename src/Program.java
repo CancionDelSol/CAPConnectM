@@ -1,14 +1,20 @@
 public class Program {
     //region Fields
-    private Gameboard _gameBoard = null;
-    private IPlayer _playerOne = null;
-    private IPlayer _playerTow = null;
-    private int _curPlayer = 0;
+    private static Gameboard _gameBoard = null;
+    private static IPlayer _playerOne = null;
+    private static IPlayer _playerTwo = null;
+    private static int _curPlayer = 0;
+    private static int _totalRounds = 0;
+    //endregion
+
+    //region Properties
+    public static Gameboard getGameboard() { return _gameBoard; }
     //endregion
 
     //region Main Entry
     public static void main(String[] args) { 
         // Run tests, then exit
+        // Special case with no cli args
         if (args.length == 0) {
             RunTests();
             return;
@@ -16,19 +22,24 @@ public class Program {
 
         // Set up Gameboard based on command
         //  line arguments
-        IPlayer playerOne = null;
-        IPlayer playerTwo = null;
         int n = Integer.parseInt(args[0]);
         int m = Integer.parseInt(args[1]);
-        int h = Integer.parseInt(args[2]);
+        _gameBoard = new Gameboard(n, m);
+
+        // First mover
+        _curPlayer = Integer.parseInt(args[2]);
+
         String address = "";
+        int port = 0;
         if (args.length == 4) {
             address = args[3];
             System.out.println("Recognized IP address: " + address);
         }
         else if (args.length == 5) {
             address = args[3] + ":" + args[4];
+            port = Integer.parseInt(args[4]);
             System.out.println("Recognized IP address: " + address);
+            System.out.println("Recognized Port      : " + port);
         }
 
         // Here are the appropriate setups concerning 
@@ -44,21 +55,19 @@ public class Program {
         //    a UDP response first or sending a move first
 
         // There will always be a computer player
-        playerTwo = new ComputerPlayer('X');
+        _playerTwo = new ComputerPlayer('X');
         
         // Case UDP
         if (!address.isEmpty()) {
-            playerOne = playerTwo;
-            playerTwo = new UDPPlayer('O', address);
+            _playerOne = _playerTwo;
+            try {
+                _playerTwo = new UDPPlayer('O', port);
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
         } else {
-            playerOne = new HumanPlayer('O');
+            _playerOne = new HumanPlayer('O');
         }
-
-        // TODO : Start game loop
-        boolean gameComplete = false;
-        do {
-
-        } while (!gameComplete);
     }
     //endregion
 
@@ -70,11 +79,12 @@ public class Program {
         boolean resOne = GameBoardConstructorTest();
         boolean resTwo = GameBoardPlacePieceTest();
         boolean resThree = GameBoardFillTest();
+        boolean resFour = ComputerVsComputerTest();
 
         System.out.println(resOne + " | GameBoardConstructorTest");
         System.out.println(resTwo + " | GameBoardPlacePieceTest");
         System.out.println(resThree + " | GameBoardFillTest");
-
+        System.out.println(resThree + " | ComputerVsComputerTest");
     }
 
     /**
@@ -119,6 +129,10 @@ public class Program {
         } catch (Exception exc) {
             exc.printStackTrace();
         }
+
+        GameLoop();
+
+        System.out.println("Have a nice Day!");
         
         return false;
     }
@@ -138,6 +152,55 @@ public class Program {
                 return false;
         }
         newBoard.DisplayGameBoard();
+        return true;
+    }
+
+    private static void GameLoop() {
+        // Start game loop
+        boolean gameComplete = false;
+        int curMoveNumber = 0;
+        do {
+
+            _totalRounds += 1; 
+
+            // Request move from player one
+            IPlayer player = _curPlayer == 0 ? _playerOne : _playerTwo;
+            _curPlayer = (_curPlayer + 1)%2;
+            
+            int res = -1;
+            try {
+                do {
+                    res = player.RequestMove(_gameBoard);
+                    System.out.println("Recieved move: " + res + " from player: " + (player.getPlayerCharacter()));
+                } while (!_gameBoard.PlacePlayerPiece(res, player));
+                
+                
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
+            
+            // TODO : Check for game completion
+            //         just play 5 rounds for now
+            if (_totalRounds >= _gameBoard.getN()*(_gameBoard.getN()-1))
+                gameComplete = true;
+
+            _gameBoard.DisplayGameBoard();
+
+        } while (!gameComplete);
+    }
+
+    private static boolean ComputerVsComputerTest() {
+        _gameBoard = new Gameboard(10, 4);
+        _playerOne = new ComputerPlayer('O');
+        _playerTwo = new ComputerPlayer('X');
+
+        try {
+            GameLoop();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            return false;
+        }
+
         return true;
     }
 }
