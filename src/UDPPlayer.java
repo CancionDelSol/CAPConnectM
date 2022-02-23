@@ -14,16 +14,36 @@ public class UDPPlayer implements IPlayer {
     private InetAddress _address;
     private byte[] _buffer;
     private int _port;
+    
     //endregion
 
     //TODO : Change address from localhost to IP
-    //add try catch for error reporting? 
+    //add try catch added for local error reporting
     
     //region Constructor
-    public UDPPlayer(char playerCharacter, int port) throws SocketException, UnknownHostException {
+    public UDPPlayer(char playerCharacter, int port) {
         _playerCharacter = playerCharacter;
-        _socket = new DatagramSocket();
-        _address = InetAddress.getByName("localhost");
+       
+        try {
+        
+        	_socket = new DatagramSocket();
+        
+        }catch(SocketException e){
+        
+        	System.err.println("unable to create and bind socket");
+    
+        }
+        
+        try {
+        
+        	_address = InetAddress.getByName("localhost");
+        
+        }catch(UnknownHostException e){
+        	
+        	System.err.println("Unknown Host");
+        	
+        }
+        
         _port = port; 
     }
     //endregion
@@ -42,31 +62,56 @@ public class UDPPlayer implements IPlayer {
     }
     //endregion
     
-    /**
-     * send UDPPlayer move(int)
-     * receive oponents move and return(int)
-     * @throws IOException 
-     */
     
-    public int sendEcho(int column) throws IOException {
+    //region send request 
+    public void sendRequest(int column) {
     	
     	String move = String.valueOf(column);
     	
     	_buffer = move.getBytes();
     	
     	DatagramPacket packet 
-    		= new DatagramPacket(_buffer, _buffer.length, _address, _port);
+		= new DatagramPacket(_buffer, _buffer.length, _address, _port);
     	
-    	_socket.send(packet);
+    	try {
+    		
+    		_socket.send(packet);
     	
-    	packet = new DatagramPacket(_buffer, _buffer.length);
+    	}catch(IOException e) {
+    
+    		System.err.println("unable to send message");
     	
-    	_socket.receive(packet);
+    	}
+    }	//endregion
+    
+    //region receive request
+    public int receiveRequest() {
+    		
+    	 byte[] buffer = new byte[_buffer.length];
+    	
+    	DatagramPacket packet = new DatagramPacket(buffer, _buffer.length);
+    	
+    	try {
+    		
+    		_socket.receive(packet);
+    		
+    	}catch(IOException ex) {
+    		System.err.println("unable to receive message");
+    		return -1;
+    	}
     	
     	String received = new String(packet.getData(), 0, packet.getLength());
     	
     	int opponentMove = Integer.parseInt(received);
     	
     	return opponentMove;
+    }	//endregion
+    
+    
+    public void closeSocket() {
+    
+    	_socket.close();
+    	
     }
+    
 }
