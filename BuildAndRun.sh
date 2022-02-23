@@ -2,16 +2,17 @@
 echo "Preparing environment"
 if ! [ -d "/src/build/" ] ; then
     mkdir src/build
+    chmod u+wr src/build
 fi
 if ! [ -d "/src/build/classes" ] ; then
     mkdir src/build/classes
+    chmod u+wr src/build
 fi
 if ! [ -d "/src/package" ] ; then
     mkdir src/package
+    chmod u+wr src/build
 fi
-#![ -d "/path/dir/" ] || mkdir src/build
-#![ -d "/path/dir/" ] || mkdir mkdir src/build/classes
-#![ -d "/path/dir/" ] || mkdir mkdir src/package
+
 cp src/*.java src/package/
 
 # Create class intermediates
