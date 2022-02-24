@@ -15,7 +15,7 @@ public class HumanPlayer implements IPlayer {
     //region IPlayer
     public int RequestMove(Gameboard board) {
         // TODO : Places random piece for now
-        return _rand.nextInt() % board.getN();
+        return Math.abs(_rand.nextInt()) % board.getN();
     }
 
     /**

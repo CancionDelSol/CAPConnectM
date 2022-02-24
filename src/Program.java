@@ -1,14 +1,20 @@
 public class Program {
     //region Fields
-    private Gameboard _gameBoard = null;
-    private IPlayer _playerOne = null;
-    private IPlayer _playerTow = null;
-    private int _curPlayer = 0;
+    private static Gameboard _gameBoard = null;
+    private static IPlayer _playerOne = null;
+    private static IPlayer _playerTwo = null;
+    private static int _curPlayer = 0;
+    private static int _totalRounds = 0;
+    //endregion
+
+    //region Properties
+    public static Gameboard getGameboard() { return _gameBoard; }
     //endregion
 
     //region Main Entry
     public static void main(String[] args) { 
         // Run tests, then exit
+        // Special case with no cli args
         if (args.length == 0) {
             RunTests();
             return;
@@ -16,19 +22,24 @@ public class Program {
 
         // Set up Gameboard based on command
         //  line arguments
-        IPlayer playerOne = null;
-        IPlayer playerTwo = null;
         int n = Integer.parseInt(args[0]);
         int m = Integer.parseInt(args[1]);
-        int h = Integer.parseInt(args[2]);
+        _gameBoard = new Gameboard(n, m);
+
+        // First mover
+        _curPlayer = Integer.parseInt(args[2]);
+
         String address = "";
+        int port = 0;
         if (args.length == 4) {
             address = args[3];
             System.out.println("Recognized IP address: " + address);
         }
         else if (args.length == 5) {
             address = args[3] + ":" + args[4];
+            port = Integer.parseInt(args[4]);
             System.out.println("Recognized IP address: " + address);
+            System.out.println("Recognized Port      : " + port);
         }
 
         // Here are the appropriate setups concerning 
@@ -44,21 +55,22 @@ public class Program {
         //    a UDP response first or sending a move first
 
         // There will always be a computer player
-        playerTwo = new ComputerPlayer('X');
+        _playerTwo = new ComputerPlayer('X');
         
         // Case UDP
         if (!address.isEmpty()) {
-            playerOne = playerTwo;
-            playerTwo = new UDPPlayer('O', address);
+            _playerOne = _playerTwo;
+            try {
+                _playerTwo = new UDPPlayer('O', port);
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
         } else {
-            playerOne = new HumanPlayer('O');
+            _playerOne = new HumanPlayer('O');
         }
 
-        // TODO : Start game loop
-        boolean gameComplete = false;
-        do {
+        GameLoop();
 
-        } while (!gameComplete);
     }
     //endregion
 
@@ -70,11 +82,14 @@ public class Program {
         boolean resOne = GameBoardConstructorTest();
         boolean resTwo = GameBoardPlacePieceTest();
         boolean resThree = GameBoardFillTest();
+        boolean resFour = ComputerVsComputerTest();
+        boolean resFive = GameboardCompletionTests();
 
         System.out.println(resOne + " | GameBoardConstructorTest");
         System.out.println(resTwo + " | GameBoardPlacePieceTest");
         System.out.println(resThree + " | GameBoardFillTest");
-
+        System.out.println(resFour + " | ComputerVsComputerTest");
+        System.out.println(resFive + " | GameboardCompletionTests");
     }
 
     /**
@@ -109,25 +124,19 @@ public class Program {
             return false;
 
         // Piece should be at index 23
-        newBoard.DisplayGameBoard();
         try {
             if (newBoard.getBoard()[23] == playerPiece) { 
                 return true;
-            } else {
-                System.out.println("Fail GameBoardPlacePieceTest");
             }
         } catch (Exception exc) {
             exc.printStackTrace();
         }
-        
         return false;
     }
 
     private static boolean GameBoardFillTest() {
         int n = 5;
         int m = 3;
-        int col = 3; // indexed starting at 0
-        char playerPiece = 'X';
 
         Gameboard newBoard = new Gameboard(n, m);
         IPlayer playerOne = new HumanPlayer('X');
@@ -137,7 +146,157 @@ public class Program {
             if(!newBoard.PlacePlayerPiece(i%n, playerOne))
                 return false;
         }
-        newBoard.DisplayGameBoard();
+        return true;
+    }
+
+    private static void GameLoop() {
+        // Start game loop
+        do {
+
+            _totalRounds += 1; 
+
+            // Request move from player one
+            IPlayer player = _curPlayer == 0 ? _playerOne : _playerTwo;
+            _curPlayer = (_curPlayer + 1)%2;
+            
+            int res = -1;
+            try {
+                do {
+                    // For the UDP Player, it must request the
+                    //  last move to make sure it was a successful move
+                    //  otherwise, handle a request for a replacement move
+                    res = player.RequestMove(_gameBoard);
+
+                    // Just for debugging, remove before submission
+                    System.out.println("Recieved move: " + res + " from player: " + (player.getPlayerCharacter()));
+                } while (!_gameBoard.PlacePlayerPiece(res, player));
+                
+                
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
+
+            _gameBoard.DisplayGameBoard();
+
+        } while (!_gameBoard.IsComplete());
+    }
+
+    private static boolean ComputerVsComputerTest() {
+        _gameBoard = new Gameboard(10, 4);
+        _playerOne = new ComputerPlayer('O');
+        _playerTwo = new ComputerPlayer('X');
+
+        try {
+            GameLoop();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean GameboardCompletionTests() {
+        IPlayer playerOne = new ComputerPlayer('X');
+        IPlayer playerTwo = new ComputerPlayer('O');
+
+        Gameboard testBoard = new Gameboard(3, 3);
+
+        // horizontal, row n = 2
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // horizontal, row n = 1
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerTwo);
+        testBoard.PlacePlayerPiece(2, playerOne);
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // horizontal, row n = 0
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerTwo);
+        testBoard.PlacePlayerPiece(2, playerOne);
+        testBoard.PlacePlayerPiece(0, playerTwo);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerTwo);
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // diagonal, y = x
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerTwo);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerTwo);
+        testBoard.PlacePlayerPiece(2, playerTwo);
+        testBoard.PlacePlayerPiece(2, playerOne);
+        
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // diagonal, y = -x
+        testBoard.PlacePlayerPiece(0, playerTwo);
+        testBoard.PlacePlayerPiece(0, playerTwo);
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(1, playerTwo);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // vertical n = 0
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(0, playerOne);
+        testBoard.PlacePlayerPiece(0, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // vertical n = 1
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(1, playerOne);
+        testBoard.PlacePlayerPiece(1, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
+        // vertical n = 2
+        testBoard.PlacePlayerPiece(2, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+        testBoard.PlacePlayerPiece(2, playerOne);
+
+        if (!testBoard.IsComplete())
+            return false;
+
+        testBoard.ClearBoard();
+
         return true;
     }
 }
