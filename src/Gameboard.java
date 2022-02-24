@@ -42,9 +42,7 @@ public class Gameboard {
         _board = new char[n*n];
         _n = n;
 
-        for (int i = 0; i < n*n; i++) {
-            _board[i] = EMPTY;
-        }
+        ClearBoard();
 
         StringBuilder bldr = new StringBuilder();
         for (int i = 0; i < n; i++) {
@@ -57,6 +55,12 @@ public class Gameboard {
     //endregion
 
     //region Methods
+    public void ClearBoard() {
+        for (int i = 0; i < _n*_n; i++) {
+            _board[i] = EMPTY;
+        }
+    }
+
     /**
      * Display the game board using ASCII characters
      * +---+---+---+---+---+ 
@@ -141,31 +145,33 @@ public class Gameboard {
             for (int nTwo = 0; nTwo < _n; nTwo++) {
                 // Retrieve the current characters
                 //  in the vertical and horizontal direction
-                Character atVerticalIndex = GetAtIndex(nOne, nTwo);
-                Character atHorizontalIndex = GetAtIndex(nTwo, nOne);
+                Character atIndex = GetAtIndex(nOne, nTwo);
 
                 // Increment the whitespace count
-                if (atVerticalIndex.equals(EMPTY)) {
+                if (atIndex.equals(EMPTY)) {
                     whitespace++;
                 }
 
                 if (nOne == 0) {
-                    curHorizChars[nTwo] = GetAtIndex(nTwo, nOne);
+                    curHorizChars[nTwo] = atIndex;
 
                     horizCounts[nTwo] = 0;
 
-                } else {
-                    if (atHorizontalIndex.equals(curHorizChars[nTwo]) && !atHorizontalIndex.equals(EMPTY))
+                } else if (!atIndex.equals(EMPTY)) {
+                    if (atIndex.equals(curHorizChars[nTwo]))
                         horizCounts[nTwo]++;
                     else{
                         horizCounts[nTwo] = 0;
-                        curHorizChars[nTwo] = atHorizontalIndex;
+                        curHorizChars[nTwo] = atIndex;
                     }
 
                     if (horizCounts[nTwo] >= _goal - 1){
-                        System.out.println("Winner! Player \'" + atHorizontalIndex + " \'");
+                        System.out.println("Horiz: " + nTwo + " Winner! Player \'" + atIndex + "\'");
                         return true;
                     }
+                } else {
+                    horizCounts[nTwo] = 0;
+                    curHorizChars[nTwo] = atIndex;
                 }
 
                 if (nTwo == 0) {
@@ -174,25 +180,70 @@ public class Gameboard {
 
                     vertCounts[nOne] = 0;
 
-                } else {
-                    if (atVerticalIndex.equals(curVertChars[nOne]) && !atVerticalIndex.equals(EMPTY)){
+                } else if (!atIndex.equals(EMPTY)) {
+                    if (atIndex.equals(curVertChars[nOne])){
                         vertCounts[nOne]++;
                     } else {
                         vertCounts[nOne] = 0;
-                        curVertChars[nOne] = atVerticalIndex;
+                        curVertChars[nOne] = atIndex;
                     }
 
                     if (vertCounts[nOne] >= _goal - 1){
-                        System.out.println("Winner! Player \'" + atVerticalIndex + " \'");
+                        System.out.println("Vert: " + nOne + " Winner! Player \'" + atIndex + "\'");
                         return true;
                     }
+                } else {
+                    vertCounts[nOne] = 0;
+                    curVertChars[nOne] = atIndex;
+                }
+
+                // Handle the diagonals
+                int clockwiseDiagonalIndex = (_n-1) + (nOne - nTwo);
+                int countercwDiagonalIndex = (nOne + nTwo);
+
+                int clockwiseCharArrayIndex = (clockwiseDiagonalIndex < _n) ? nOne : nTwo;
+                int countercwCharArrayIndex = (countercwDiagonalIndex < _n) ? nOne : (_n-1) - nTwo;
+
+                if (clockwiseCharArrayIndex == 0) {
+                    diagCWChars[clockwiseDiagonalIndex] = atIndex;
+                    diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                } else if (!atIndex.equals(EMPTY)) {
+                    if (atIndex.equals(diagCWChars[clockwiseDiagonalIndex])) {
+                        diagClockwiseCounts[clockwiseDiagonalIndex]++;
+                    } else {
+                        diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                        diagCWChars[clockwiseDiagonalIndex] = atIndex;
+                    }
+
+                    if (diagClockwiseCounts[clockwiseDiagonalIndex] >= _goal - 1) {
+                        System.out.println("DC: " + clockwiseDiagonalIndex + " Winner! Player \'" + atIndex + "\'");
+                        return true;
+                    }
+                } else {
+                    diagClockwiseCounts[countercwDiagonalIndex] = 0;
+                    diagCWChars[countercwDiagonalIndex] = atIndex;
+                }
+
+                if (countercwCharArrayIndex == 0) {
+                    diagCCWChars[countercwDiagonalIndex] = atIndex;
+                    diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                } else if (!atIndex.equals(EMPTY)) {
+                    if (atIndex.equals(diagCCWChars[countercwDiagonalIndex])) {
+                        diagCClockwiseCounts[countercwDiagonalIndex]++;
+                    } else {
+                        diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                        diagCCWChars[countercwDiagonalIndex] = atIndex;
+                    }
+
+                    if (diagCClockwiseCounts[countercwDiagonalIndex] >= _goal - 1) {
+                        System.out.println("DCC: " + countercwDiagonalIndex + " Winner! Player \'" + atIndex + "\'");
+                        return true;
+                    }
+                } else {
+                    diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                    diagCCWChars[countercwDiagonalIndex] = atIndex;
                 }
             }
-        }
-
-        // Check the diagonal (y=-x)
-        for (int diag = 0; diag < (_n*2) - 1; diag++) {
-            // TODO : How to do this?
         }
 
         // The last test case is to see
