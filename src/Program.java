@@ -173,7 +173,12 @@ public class Program {
             int res = -1;
             try {
                 do {
+                    // For the UDP Player, it must request the
+                    //  last move to make sure it was a successful move
+                    //  otherwise, handle a request for a replacement move
                     res = player.RequestMove(_gameBoard);
+
+                    // Just for debugging, remove before submission
                     System.out.println("Recieved move: " + res + " from player: " + (player.getPlayerCharacter()));
                 } while (!_gameBoard.PlacePlayerPiece(res, player));
                 
@@ -181,15 +186,10 @@ public class Program {
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
-            
-            // TODO : Check for game completion
-            //         just play 5 rounds for now
-            if (_totalRounds >= _gameBoard.getN()*(_gameBoard.getN()-1))
-                gameComplete = true;
 
             _gameBoard.DisplayGameBoard();
 
-        } while (!gameComplete);
+        } while (!_gameBoard.IsComplete());
     }
 
     private static boolean ComputerVsComputerTest() {
