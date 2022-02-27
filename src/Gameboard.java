@@ -292,8 +292,8 @@ public class Gameboard {
                         _isComplete = true;
                     }
                 } else {
-                    diagClockwiseCounts[countercwDiagonalIndex] = 0;
-                    diagCWChars[countercwDiagonalIndex] = atIndex;
+                    diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                    diagCWChars[clockwiseDiagonalIndex] = atIndex;
                 }
 
                 if (countercwCharArrayIndex == 0) {

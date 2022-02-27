@@ -11,4 +11,5 @@ public class Util {
             return _ref;
         }
     }
+    public static final double Epsilon = 1E-8;
 }

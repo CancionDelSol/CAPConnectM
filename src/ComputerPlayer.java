@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class ComputerPlayer implements IPlayer {
@@ -91,6 +92,7 @@ public class ComputerPlayer implements IPlayer {
         int EvaluateBestMove() {
             // Return column action
             int rVal = -1;
+            List<Integer> bestMoves = new ArrayList<>();
 
             // Initialize alpha and beta
             Double alpha = Double.MIN_VALUE;
@@ -108,13 +110,18 @@ public class ComputerPlayer implements IPlayer {
                 // Create new node with this action
                 Node newNode = new Node(_headNode, new Action(i));
                 Double aPrime = minValue(newNode, alpha, beta);
-                if (aPrime > alpha) {
+
+                if (Math.abs(aPrime - alpha) <= Util.Epsilon) {
                     alpha = aPrime;
-                    rVal = i;
+                    bestMoves.add(i);
+                } else if ( aPrime > alpha) {
+                    alpha = aPrime;
+                    bestMoves.clear();
+                    bestMoves.add(i);
                 }
             }
 
-            return rVal;
+            return bestMoves.get(_rand.nextInt(bestMoves.size()));
         }
 
         /**
