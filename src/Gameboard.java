@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.lang.StringBuilder;
 
 /**
@@ -19,10 +20,19 @@ public class Gameboard {
     private HashMap<Character, Integer> _recentMoves = new HashMap<>();
     private int _n = 0;
     private int _goal = 0;
+    private boolean[] _availableColumns;
+    private boolean _isComplete = false;
+    private HashMap<Character, HashMap<Directionality, int[]>> _stats = null;
+
+    public String BoardMessage = "";
     //endregion
 
     //region Properties
     public char[] getBoard() { return _board; }
+
+    public boolean getIsComplete() { return _isComplete; }
+
+    public HashMap<Character, HashMap<Directionality, int[]>> getStats() { return _stats; }
 
     /**
      * Return the last move by player
@@ -40,6 +50,7 @@ public class Gameboard {
     //region Constructor
     public Gameboard(int n, int m) {
         _board = new char[n*n];
+        _availableColumns = new boolean[n];
         _n = n;
 
         ClearBoard();
@@ -47,6 +58,7 @@ public class Gameboard {
         StringBuilder bldr = new StringBuilder();
         for (int i = 0; i < n; i++) {
             bldr.append("+---");
+            _availableColumns[i] = true;
         }
         bldr.append("+");
         DIVIDING_ROW = bldr.toString();
@@ -113,10 +125,24 @@ public class Gameboard {
         return false;
     }
 
-    public boolean IsComplete() {
+    public void EvaluateStatistics(List<IPlayer> players) {
+        // Build hash map of output statistics
+        HashMap<Character, HashMap<Directionality, int[]>> rVal = new HashMap<>();
+        for (IPlayer player : players) {
+            HashMap<Directionality, int[]> subMap = new HashMap<>();
+
+            subMap.put(Directionality.Vertical, new int[_n]);
+            subMap.put(Directionality.Horizontal, new int[_n]);
+            subMap.put(Directionality.DiagonalDown, new int[(_n * 2) - 1]);
+            subMap.put(Directionality.DiagonalDown, new int[(_n * 2) - 1]);
+
+            rVal.put(player.getPlayerCharacter(), subMap);
+        }
+
         // Count whitespace to check for full
         //  board
         int whitespace = 0;
+        _isComplete = false;
 
         // Counters for calculating longest 
         //  string of characters
@@ -142,6 +168,8 @@ public class Gameboard {
 
         // Check all of the columns and rows
         for (int nOne = 0; nOne < _n; nOne++) {
+            _availableColumns[nOne] = GetAtIndex(nOne, 0).equals(EMPTY) ? true : false;
+
             for (int nTwo = 0; nTwo < _n; nTwo++) {
                 // Retrieve the current characters
                 //  in the vertical and horizontal direction
@@ -155,19 +183,30 @@ public class Gameboard {
                 if (nOne == 0) {
                     curHorizChars[nTwo] = atIndex;
 
-                    horizCounts[nTwo] = 0;
+                    horizCounts[nTwo] = 1;
+                    if (rVal.containsKey(atIndex)) {
+                        if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
+                            rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
+                        }
+                    }
 
                 } else if (!atIndex.equals(EMPTY)) {
-                    if (atIndex.equals(curHorizChars[nTwo]))
+                    if (atIndex.equals(curHorizChars[nTwo])) {
                         horizCounts[nTwo]++;
+                        if (rVal.containsKey(atIndex)) {
+                            if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
+                                rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
+                            }
+                        }
+                    }
                     else{
                         horizCounts[nTwo] = 0;
                         curHorizChars[nTwo] = atIndex;
                     }
 
                     if (horizCounts[nTwo] >= _goal - 1){
-                        System.out.println("Horiz: " + nTwo + " Winner! Player \'" + atIndex + "\'");
-                        return true;
+                        BoardMessage = "Horiz: " + nTwo + " Winner! Player \'" + atIndex + "\'";
+                        _isComplete = true;
                     }
                 } else {
                     horizCounts[nTwo] = 0;
@@ -176,21 +215,31 @@ public class Gameboard {
 
                 if (nTwo == 0) {
                     // Reset the column and row counts
-                    curVertChars[nOne] = GetAtIndex(nOne, nTwo);
+                    curVertChars[nOne] = atIndex;
 
-                    vertCounts[nOne] = 0;
+                    vertCounts[nOne] = 1;
+                    if (rVal.containsKey(atIndex)) {
+                        if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
+                            rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
+                        }
+                    }
 
                 } else if (!atIndex.equals(EMPTY)) {
                     if (atIndex.equals(curVertChars[nOne])){
                         vertCounts[nOne]++;
+                        if (rVal.containsKey(atIndex)) {
+                            if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
+                                rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
+                            }
+                        }
                     } else {
                         vertCounts[nOne] = 0;
                         curVertChars[nOne] = atIndex;
                     }
 
                     if (vertCounts[nOne] >= _goal - 1){
-                        System.out.println("Vert: " + nOne + " Winner! Player \'" + atIndex + "\'");
-                        return true;
+                        BoardMessage = "Vert: " + nOne + " Winner! Player \'" + atIndex + "\'";
+                        _isComplete = true;
                     }
                 } else {
                     vertCounts[nOne] = 0;
@@ -206,18 +255,28 @@ public class Gameboard {
 
                 if (clockwiseCharArrayIndex == 0) {
                     diagCWChars[clockwiseDiagonalIndex] = atIndex;
-                    diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                    diagClockwiseCounts[clockwiseDiagonalIndex] = 1;
+                    if (rVal.containsKey(atIndex)) {
+                        if (diagClockwiseCounts[clockwiseDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex]) {
+                            rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex] = diagClockwiseCounts[clockwiseDiagonalIndex];
+                        }
+                    }
                 } else if (!atIndex.equals(EMPTY)) {
                     if (atIndex.equals(diagCWChars[clockwiseDiagonalIndex])) {
                         diagClockwiseCounts[clockwiseDiagonalIndex]++;
+                        if (rVal.containsKey(atIndex)) {
+                            if (diagClockwiseCounts[clockwiseDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex]) {
+                                rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex] = diagClockwiseCounts[clockwiseDiagonalIndex];
+                            }
+                        }
                     } else {
                         diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
                         diagCWChars[clockwiseDiagonalIndex] = atIndex;
                     }
 
                     if (diagClockwiseCounts[clockwiseDiagonalIndex] >= _goal - 1) {
-                        System.out.println("DC: " + clockwiseDiagonalIndex + " Winner! Player \'" + atIndex + "\'");
-                        return true;
+                        BoardMessage = "DC: " + clockwiseDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
+                        _isComplete = true;
                     }
                 } else {
                     diagClockwiseCounts[countercwDiagonalIndex] = 0;
@@ -227,17 +286,27 @@ public class Gameboard {
                 if (countercwCharArrayIndex == 0) {
                     diagCCWChars[countercwDiagonalIndex] = atIndex;
                     diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                    if (rVal.containsKey(atIndex)) {
+                        if (diagCClockwiseCounts[countercwDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex]) {
+                            rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex] = diagCClockwiseCounts[countercwDiagonalIndex];
+                        }
+                    }
                 } else if (!atIndex.equals(EMPTY)) {
                     if (atIndex.equals(diagCCWChars[countercwDiagonalIndex])) {
                         diagCClockwiseCounts[countercwDiagonalIndex]++;
+                        if (rVal.containsKey(atIndex)) {
+                            if (diagCClockwiseCounts[countercwDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex]) {
+                                rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex] = diagCClockwiseCounts[countercwDiagonalIndex];
+                            }
+                        }
                     } else {
                         diagCClockwiseCounts[countercwDiagonalIndex] = 0;
                         diagCCWChars[countercwDiagonalIndex] = atIndex;
                     }
 
                     if (diagCClockwiseCounts[countercwDiagonalIndex] >= _goal - 1) {
-                        System.out.println("DCC: " + countercwDiagonalIndex + " Winner! Player \'" + atIndex + "\'");
-                        return true;
+                        BoardMessage = "DCC: " + countercwDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
+                        _isComplete = true;
                     }
                 } else {
                     diagCClockwiseCounts[countercwDiagonalIndex] = 0;
@@ -250,7 +319,10 @@ public class Gameboard {
         //  if the entire board has been filled
         //  If the whitespace is zero, the board
         //   is filled
-        return whitespace == 0;
+        _isComplete = whitespace == 0;
+
+        // Return the stats
+        _stats = rVal;
     }
 
     /**
@@ -262,5 +334,30 @@ public class Gameboard {
     public Character GetAtIndex(int x, int y) {
         return _board[y*_n + x];
     }
+
+    /**
+     * Make an exact copy of this gameboard
+     */
+    @Override
+    public Object clone() {
+        Gameboard newBoard = new Gameboard(_n, _goal);
+        for (int i = 0; i < _board.length; i++) 
+            newBoard._board[i] = _board[i];
+            
+        for (int i = 0; i < _n; i++)
+            newBoard._availableColumns[i] = _availableColumns[i];
+        
+        for (Character key : _recentMoves.keySet()) 
+            newBoard._recentMoves.put(key, _recentMoves.get(key));
+        
+        return newBoard;
+    }
     //endregion
+
+    static enum Directionality {
+        Vertical,
+        Horizontal,
+        DiagonalUp,
+        DiagonalDown
+    }
 }
