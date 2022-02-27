@@ -23,33 +23,8 @@ public class UDPPlayer implements IPlayer {
     
     //region Constructor
  
-    public UDPPlayer(char playerCharacter, int port) {
-        _playerCharacter = playerCharacter;
+   
        
-        try {
-        
-        	_socket = new DatagramSocket();
-        
-        }catch(SocketException e){
-        
-        	System.err.println("unable to create and bind socket");
-    
-        }
-        
-        try {
-        
-        	_address = InetAddress.getByName("localhost");
-        
-        }catch(UnknownHostException e){
-        	
-        	System.err.println("Unknown Host");
-        	
-        }
-        
-
-    public UDPPlayer(char playerCharacter, int port)  throws SocketException, UnknownHostException {
-        this(playerCharacter, port, "");
-    }
 
     public UDPPlayer(char playerCharacter, int port, String outgoingAddress) throws SocketException, UnknownHostException {
         _playerCharacter = playerCharacter;
@@ -83,13 +58,7 @@ public class UDPPlayer implements IPlayer {
  
     
     //region send request 
-    public void sendRequest(int column) 
-    /**
-     * send UDPPlayer move(int)
-     * receive oponents move and return(int)
-     * @throws IOException 
-     */
-    public int sendEcho(int column) throws IOException {
+    public void sendRequest(int column) {
 
     	
     	String move = String.valueOf(column);
@@ -115,8 +84,6 @@ public class UDPPlayer implements IPlayer {
     public int receiveRequest() {
     		
     	 byte[] buffer = new byte[_buffer.length];
-
-    	packet = new DatagramPacket(_buffer, _buffer.length, _localAddress, _port);
 
     	
     	DatagramPacket packet = new DatagramPacket(buffer, _buffer.length);

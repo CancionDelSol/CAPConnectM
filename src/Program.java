@@ -61,7 +61,7 @@ public class Program {
         if (!address.isEmpty()) {
             _playerOne = _playerTwo;
             try {
-                _playerTwo = new UDPPlayer('O', port);
+                _playerTwo = new UDPPlayer('O', port, address);
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
