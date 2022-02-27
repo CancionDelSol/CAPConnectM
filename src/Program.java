@@ -167,18 +167,29 @@ public class Program {
             IPlayer player = _curPlayer == 0 ? _playerOne : _playerTwo;
             _curPlayer = (_curPlayer + 1)%2;
             
+            int invalidCounter = 0;
+            
             int res = -1;
             try {
                 do {
                     // For the UDP Player, it must request the
                     //  last move to make sure it was a successful move
                     //  otherwise, handle a request for a replacement move
-                    res = player.RequestMove(_gameBoard);
-
+                    
+                	if(invalidCounter > 0) {
+                		
+                		System.out.println("That is an invalid move!");
+                	}
+                	
+                	res = player.RequestMove(_gameBoard);
+                    
+                    invalidCounter++;
+                    
                     // Just for debugging, remove before submission
                     System.out.println("Recieved move: " + res + " from player: " + (player.getPlayerCharacter()));
                 } while (!_gameBoard.PlacePlayerPiece(res, player));
                 
+                invalidCounter = 0;
                 
             } catch (Exception exc) {
                 exc.printStackTrace();

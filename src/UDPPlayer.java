@@ -4,6 +4,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Random;
 
 public class UDPPlayer implements IPlayer {
@@ -43,8 +44,15 @@ public class UDPPlayer implements IPlayer {
 
     //region IPlayer
     public int RequestMove(Gameboard board) {
-        // TODO : Places random piece for now
-        return Math.abs(_rand.nextInt()) % board.getN();
+        
+    	HashMap<Character, Integer> _recentMoves = board.getLastMoves();
+    	
+    	 sendRequest(_recentMoves.get('O'));
+    	 
+    	 return receiveRequest();
+    	 
+    	 
+    	
     }
 
     /**
