@@ -24,11 +24,7 @@ public class UDPPlayer implements IPlayer {
     //region Constructor
  
    
-        
-
-    public UDPPlayer(char playerCharacter, int port)  throws SocketException, UnknownHostException {
-        this(playerCharacter, port, "");
-    }
+       
 
     public UDPPlayer(char playerCharacter, int port, String outgoingAddress) throws SocketException, UnknownHostException {
         _playerCharacter = playerCharacter;
