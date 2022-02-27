@@ -1,7 +1,6 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 
 public class ComputerPlayer implements IPlayer {
@@ -19,10 +18,10 @@ public class ComputerPlayer implements IPlayer {
     //region IPlayer
     public int RequestMove(Gameboard board) {
         // Create a graph using the current state
-        Graph tree = new Graph(board);
+        Graph tree = new Graph(board, this);
 
         try {
-            return tree.EvaluateBestMove(this);
+            return tree.EvaluateBestMove();
         } catch (Exception exc) {
             exc.printStackTrace();
         }
@@ -76,10 +75,12 @@ public class ComputerPlayer implements IPlayer {
     class Graph {
         private Gameboard _initialState = null;
         private Node _headNode = null;
+        private IPlayer _player = null;
 
-        Graph(Gameboard currentState) {
+        Graph(Gameboard currentState, IPlayer player) {
             _initialState = currentState;
             _headNode = new Node(null, null);
+            _player = player;
         }
 
         /**
@@ -87,13 +88,83 @@ public class ComputerPlayer implements IPlayer {
          *  using a min-max tree and alpha-beta
          *  pruning
          */
-        int EvaluateBestMove(IPlayer player) {
-            double alpha = Double.MIN_VALUE;
-            double beta = Double.MAX_VALUE;
+        int EvaluateBestMove() {
+            // Return column action
+            int rVal = -1;
 
-            
+            // Initialize alpha and beta
+            Double alpha = Double.MIN_VALUE;
+            Double beta = Double.MAX_VALUE;
 
-            return _rand.nextInt(_initialState.getN());
+            // Get available moves
+            int[] availableMoves = _initialState.getAvailableMoves();
+
+            // Iterate over available moves
+            for (int i = 0; i < availableMoves.length; i++) {
+                // Don't evaluate if no open spaces
+                if (availableMoves[i] == 0)
+                    continue;
+
+                // Create new node with this action
+                Node newNode = new Node(_headNode, new Action(i));
+                Double aPrime = minValue(newNode, alpha, beta);
+                if (aPrime > alpha) {
+                    alpha = aPrime;
+                    rVal = i;
+                }
+            }
+
+            return rVal;
+        }
+
+        /**
+         * Recursive min call
+         */
+        Double minValue(Node node, double alpha, double beta) {
+            Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
+            Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
+            Double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+
+            // Handle game completion
+            if (isComplete.getRef())
+                return nodeUtil;
+
+            for (int i = 0; i < availMoves.getRef().length; i ++) {
+                if (availMoves.getRef()[i] == 0)
+                    continue;
+
+                Node newNode = new Node(node, new Action(i));
+                beta = Math.min(beta, maxValue (newNode, alpha, beta));
+                if (alpha >= beta){
+                    return Double.MIN_VALUE;
+                }
+            }
+            return beta;
+        }
+
+        /**
+         * Recursive max call
+         */
+        Double maxValue(Node node, Double alpha, Double beta) {
+            Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
+            Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
+            Double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+
+            // Handle game completion
+            if (isComplete.getRef())
+                return nodeUtil;
+
+            for (int i = 0; i < availMoves.getRef().length; i ++) {
+                if (availMoves.getRef()[i] == 0)
+                    continue;
+                    
+                Node newNode = new Node(node, new Action(i));
+                alpha = Math.max(alpha, minValue(newNode, alpha, beta));
+                if (alpha >= beta){
+                    return Double.MAX_VALUE;
+                }
+            }
+            return alpha;    
         }
 
         /**
@@ -101,9 +172,14 @@ public class ComputerPlayer implements IPlayer {
          *  action deltas along the tree and evaluate
          *  the new state's utility. 
          */
-        double EvaluateNodeUtility(Node node, IPlayer player) {
-            // Return value
-            double rVal = Math.abs(_rand.nextDouble());
+        double EvaluateNodeUtility(Node node, IPlayer player, Util.RefSupport<int[]> availMoves, Util.RefSupport<Boolean> isComplete) {
+            IPlayer opponent = null;
+            for (IPlayer p : _initialState.getPlayers()) {
+                if (p.getPlayerCharacter() != _player.getPlayerCharacter()) {
+                    opponent = p;
+                    break;
+                }
+            }
 
             // Climb the tree and gather deltas
             int nodeDepth = node.GetDepth();
@@ -119,24 +195,76 @@ public class ComputerPlayer implements IPlayer {
                 if (curNode.IsNill())
                     break;
 
-                actions[index] = curNode._delta;
+                actions[index--] = curNode._delta;
                 curNode = curNode._parent;
             } while (curNode != null);
 
             // Clone Gameboard and place moves
             Gameboard sandbox = (Gameboard)_initialState.clone();
+            int flip = 0;
             for (Action action : actions) {
-                sandbox.PlacePlayerPiece(action.COLUMN, player);
+                boolean placementRes = flip == 0 ? sandbox.PlacePlayerPiece(action.COLUMN, player) : sandbox.PlacePlayerPiece(action.COLUMN, opponent);
+                if (!placementRes)
+                    break;
             }
 
             // Run evaluations
             sandbox.EvaluateStatistics();
 
+            // Set reference object
+            availMoves.setRef(sandbox.getAvailableMoves());
+
+            // Return NaN for game complete
+            //  Special case
+            if (sandbox.getIsComplete())
+                isComplete.setRef(true);
+
             // Apply heuristic to current board state
-            // TODO
+            //  Simple heuristic for now:
+            //   - Look through the counts for each 
+            //      Directionality. Add the inverse
+            //      of the opponents longest chain for
+            //      each directionality. Return the average
+            //      over each directionality as a single double
+            double sum = 0.0;
+            int count = 0;
+            double goal = (double)_initialState.getGoal();
+            HashMap<Character, HashMap<Gameboard.Directionality, int[]>> stats = sandbox.getStats();
+
+            // Over Verticals
+            int[] verticalPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.Vertical);
+            int[] verticalOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.Vertical);
+            for (int i = 0; i < verticalPlayerSet.length; i++) {
+                count++;
+                sum += verticalPlayerSet[i]/goal + (1.0 - (verticalOpponentSet[i]/goal));
+            }
+
+            // Over Horizontals
+            int[] horizPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.Horizontal);
+            int[] horizOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.Horizontal);
+            for (int i = 0; i < horizPlayerSet.length; i++) {
+                count++;
+                sum += horizPlayerSet[i]/goal + (1.0 - (horizOpponentSet[i]/goal));
+            }
+
+            // Over Diagonalup
+            int[] diagUpPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalUp);
+            int[] diagUpOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalUp);
+            for (int i = 0; i < diagUpPlayerSet.length; i++) {
+                count++;
+                sum += diagUpPlayerSet[i]/goal + (1.0 - (diagUpOpponentSet[i]/goal));
+            }
+
+            // Over Diagonaldown
+            int[] diagDownPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalDown);
+            int[] diagDownOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalDown);
+            for (int i = 0; i < diagDownPlayerSet.length; i++) {
+                count++;
+                sum += diagDownPlayerSet[i]/goal + (1.0 - (diagDownOpponentSet[i]/goal));
+            }
 
             // Return utility
-            return rVal;
+            return sum/((double)count);
         }
     }
 }

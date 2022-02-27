@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.lang.StringBuilder;
@@ -21,7 +22,7 @@ public class Gameboard {
     private HashMap<Character, Integer> _recentMoves = new HashMap<>();
     private int _n = 0;
     private int _goal = 0;
-    private boolean[] _availableColumns;
+    private int[] _availableColumns;
     private boolean _isComplete = false;
     private HashMap<Character, HashMap<Directionality, int[]>> _stats = null;
     private List<IPlayer> _registeredPlayers = new ArrayList<>();
@@ -30,6 +31,8 @@ public class Gameboard {
     //endregion
 
     //region Properties
+    public int[] getAvailableMoves() { return _availableColumns; }
+    
     public char[] getBoard() { return _board; }
 
     public boolean getIsComplete() { return _isComplete; }
@@ -50,7 +53,7 @@ public class Gameboard {
     //region Constructor
     public Gameboard(int n, int m) {
         _board = new char[n*n];
-        _availableColumns = new boolean[n];
+        _availableColumns = new int[n];
         _n = n;
 
         ClearBoard();
@@ -58,7 +61,6 @@ public class Gameboard {
         StringBuilder bldr = new StringBuilder();
         for (int i = 0; i < n; i++) {
             bldr.append("+---");
-            _availableColumns[i] = true;
         }
         bldr.append("+");
         DIVIDING_ROW = bldr.toString();
@@ -67,8 +69,13 @@ public class Gameboard {
     //endregion
 
     //region Methods
+    public List<IPlayer> getPlayers() {
+        return _registeredPlayers;
+    }
+    
     public void RegisterPlayer(IPlayer player) {
-        _registeredPlayers.add(player);
+        if (!_registeredPlayers.contains(player))
+            _registeredPlayers.add(player);
     }
 
     public void ClearBoard() {
@@ -129,7 +136,19 @@ public class Gameboard {
         return false;
     }
 
+    /**
+     * Evaluate all stats for the current state
+     *  of the gameboard. This only iterates through
+     *  the entire board once. Although it does use
+     *  a decent chunk of memory in order to do so
+     */
     public void EvaluateStatistics() {
+        // Clear stats reference
+        _stats = null;
+
+        // Reset available column counts
+        Arrays.fill(_availableColumns, 0);
+
         // Build hash map of output statistics
         HashMap<Character, HashMap<Directionality, int[]>> rVal = new HashMap<>();
         for (IPlayer player : _registeredPlayers) {
@@ -138,7 +157,7 @@ public class Gameboard {
             subMap.put(Directionality.Vertical, new int[_n]);
             subMap.put(Directionality.Horizontal, new int[_n]);
             subMap.put(Directionality.DiagonalDown, new int[(_n * 2) - 1]);
-            subMap.put(Directionality.DiagonalDown, new int[(_n * 2) - 1]);
+            subMap.put(Directionality.DiagonalUp, new int[(_n * 2) - 1]);
 
             rVal.put(player.getPlayerCharacter(), subMap);
         }
@@ -161,19 +180,8 @@ public class Gameboard {
         Character[] diagCWChars = new Character[(_n*2) - 1];
         Character[] diagCCWChars = new Character[(_n*2) - 1];
 
-        // Initialize the arrays to initial
-        //  values
-        for (int i = 0; i < _n; i++) {
-            vertCounts[i] = 0;
-            horizCounts[i] = 0;
-            diagClockwiseCounts[i] = 0;
-            diagCClockwiseCounts[i] = 0;
-        }
-
         // Check all of the columns and rows
         for (int nOne = 0; nOne < _n; nOne++) {
-            _availableColumns[nOne] = GetAtIndex(nOne, 0).equals(EMPTY) ? true : false;
-
             for (int nTwo = 0; nTwo < _n; nTwo++) {
                 // Retrieve the current characters
                 //  in the vertical and horizontal direction
@@ -182,6 +190,7 @@ public class Gameboard {
                 // Increment the whitespace count
                 if (atIndex.equals(EMPTY)) {
                     whitespace++;
+                    _availableColumns[nOne]++;
                 }
 
                 if (nOne == 0) {
@@ -323,7 +332,7 @@ public class Gameboard {
         //  if the entire board has been filled
         //  If the whitespace is zero, the board
         //   is filled
-        _isComplete = whitespace == 0;
+        _isComplete = _isComplete || whitespace == 0;
 
         // Return the stats
         _stats = rVal;
@@ -353,6 +362,10 @@ public class Gameboard {
         
         for (Character key : _recentMoves.keySet()) 
             newBoard._recentMoves.put(key, _recentMoves.get(key));
+
+        for (IPlayer player : _registeredPlayers) {
+            newBoard.RegisterPlayer(player);
+        }
         
         return newBoard;
     }

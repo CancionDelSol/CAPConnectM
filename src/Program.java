@@ -4,7 +4,6 @@ public class Program {
     private static IPlayer _playerOne = null;
     private static IPlayer _playerTwo = null;
     private static int _curPlayer = 0;
-    private static int _totalRounds = 0;
     //endregion
 
     //region Properties
@@ -69,6 +68,12 @@ public class Program {
             _playerOne = new HumanPlayer('O');
         }
 
+        // Register players with gameboard
+        //  and evaluate stats
+        _gameBoard.RegisterPlayer(_playerOne);
+        _gameBoard.RegisterPlayer(_playerTwo);
+        _gameBoard.EvaluateStatistics();
+
         GameLoop();
 
     }
@@ -79,17 +84,17 @@ public class Program {
      * Runs all available tests
      */
     private static void RunTests() {
-        boolean resOne = GameBoardConstructorTest();
-        boolean resTwo = GameBoardPlacePieceTest();
-        boolean resThree = GameBoardFillTest();
+        //boolean resOne = GameBoardConstructorTest();
+        //boolean resTwo = GameBoardPlacePieceTest();
+        //boolean resThree = GameBoardFillTest();
         boolean resFour = ComputerVsComputerTest();
-        boolean resFive = GameboardCompletionTests();
+        //boolean resFive = GameboardCompletionTests();
 
-        System.out.println(resOne + " | GameBoardConstructorTest");
-        System.out.println(resTwo + " | GameBoardPlacePieceTest");
-        System.out.println(resThree + " | GameBoardFillTest");
+        //System.out.println(resOne + " | GameBoardConstructorTest");
+        //System.out.println(resTwo + " | GameBoardPlacePieceTest");
+        //System.out.println(resThree + " | GameBoardFillTest");
         System.out.println(resFour + " | ComputerVsComputerTest");
-        System.out.println(resFive + " | GameboardCompletionTests");
+        //System.out.println(resFive + " | GameboardCompletionTests");
     }
 
     /**
@@ -120,7 +125,7 @@ public class Program {
         IPlayer newTestHumanPlayer = new HumanPlayer('X');
         newBoard.PlacePlayerPiece(col, newTestHumanPlayer);
 
-        if (newBoard.getLastMoveForPlayer(newTestHumanPlayer) != col)
+        if (newBoard.getLastMoves().get(newTestHumanPlayer.getPlayerCharacter()) != col)
             return false;
 
         // Piece should be at index 23
@@ -150,11 +155,14 @@ public class Program {
     }
 
     private static void GameLoop() {
+        // Register players with gameboard
+        //  and evaluate stats
+        _gameBoard.RegisterPlayer(_playerOne);
+        _gameBoard.RegisterPlayer(_playerTwo);
+        _gameBoard.EvaluateStatistics();
+
         // Start game loop
         do {
-
-            _totalRounds += 1; 
-
             // Request move from player one
             IPlayer player = _curPlayer == 0 ? _playerOne : _playerTwo;
             _curPlayer = (_curPlayer + 1)%2;
@@ -178,16 +186,19 @@ public class Program {
 
             _gameBoard.DisplayGameBoard();
 
-        } while (!_gameBoard.IsComplete());
+            _gameBoard.EvaluateStatistics();
+
+        } while (!_gameBoard.getIsComplete());
     }
 
     private static boolean ComputerVsComputerTest() {
-        _gameBoard = new Gameboard(10, 4);
+        _gameBoard = new Gameboard(5, 5);
         _playerOne = new ComputerPlayer('O');
         _playerTwo = new ComputerPlayer('X');
-
+        
         try {
             GameLoop();
+
         } catch (Exception exc) {
             exc.printStackTrace();
             return false;
@@ -207,7 +218,7 @@ public class Program {
         testBoard.PlacePlayerPiece(1, playerOne);
         testBoard.PlacePlayerPiece(2, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -220,7 +231,7 @@ public class Program {
         testBoard.PlacePlayerPiece(1, playerOne);
         testBoard.PlacePlayerPiece(2, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -236,7 +247,7 @@ public class Program {
         testBoard.PlacePlayerPiece(1, playerOne);
         testBoard.PlacePlayerPiece(2, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -249,7 +260,7 @@ public class Program {
         testBoard.PlacePlayerPiece(2, playerTwo);
         testBoard.PlacePlayerPiece(2, playerOne);
         
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -262,7 +273,7 @@ public class Program {
         testBoard.PlacePlayerPiece(1, playerOne);
         testBoard.PlacePlayerPiece(2, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -272,7 +283,7 @@ public class Program {
         testBoard.PlacePlayerPiece(0, playerOne);
         testBoard.PlacePlayerPiece(0, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -282,7 +293,7 @@ public class Program {
         testBoard.PlacePlayerPiece(1, playerOne);
         testBoard.PlacePlayerPiece(1, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
@@ -292,7 +303,7 @@ public class Program {
         testBoard.PlacePlayerPiece(2, playerOne);
         testBoard.PlacePlayerPiece(2, playerOne);
 
-        if (!testBoard.IsComplete())
+        if (!testBoard.getIsComplete())
             return false;
 
         testBoard.ClearBoard();
