@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.Scanner;
 
 public class HumanPlayer implements IPlayer {
     //region Fields
@@ -14,8 +15,15 @@ public class HumanPlayer implements IPlayer {
 
     //region IPlayer
     public int RequestMove(Gameboard board) {
-        // TODO : Places random piece for now
-        return Math.abs(_rand.nextInt()) % board.getN();
+        
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("Which column would you like to select as your move?");
+        
+        return sc.nextInt();
+    	
+    	
+    	
     }
 
     /**
