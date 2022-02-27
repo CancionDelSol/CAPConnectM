@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.lang.StringBuilder;
@@ -23,6 +24,7 @@ public class Gameboard {
     private boolean[] _availableColumns;
     private boolean _isComplete = false;
     private HashMap<Character, HashMap<Directionality, int[]>> _stats = null;
+    private List<IPlayer> _registeredPlayers = new ArrayList<>();
 
     public String BoardMessage = "";
     //endregion
@@ -38,10 +40,8 @@ public class Gameboard {
      * Return the last move by player
      * Returns -1 for missing key
      */
-    public int getLastMoveForPlayer(IPlayer player) {
-        if (_recentMoves.containsKey(player.getPlayerCharacter()))
-            return _recentMoves.get(player.getPlayerCharacter());
-        return -1;
+    public HashMap<Character, Integer> getLastMoves() {
+        return _recentMoves;
     }
     public int getGoal() { return _goal; }
     public int getN() { return _n; }
@@ -67,6 +67,10 @@ public class Gameboard {
     //endregion
 
     //region Methods
+    public void RegisterPlayer(IPlayer player) {
+        _registeredPlayers.add(player);
+    }
+
     public void ClearBoard() {
         for (int i = 0; i < _n*_n; i++) {
             _board[i] = EMPTY;
@@ -125,10 +129,10 @@ public class Gameboard {
         return false;
     }
 
-    public void EvaluateStatistics(List<IPlayer> players) {
+    public void EvaluateStatistics() {
         // Build hash map of output statistics
         HashMap<Character, HashMap<Directionality, int[]>> rVal = new HashMap<>();
-        for (IPlayer player : players) {
+        for (IPlayer player : _registeredPlayers) {
             HashMap<Directionality, int[]> subMap = new HashMap<>();
 
             subMap.put(Directionality.Vertical, new int[_n]);
