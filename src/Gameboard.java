@@ -193,137 +193,103 @@ public class Gameboard {
                     _availableColumns[nOne]++;
                 }
 
-                if (nOne == 0) {
-                    curHorizChars[nTwo] = atIndex;
-
-                    horizCounts[nTwo] = 1;
-                    if (rVal.containsKey(atIndex)) {
-                        if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
-                            rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
-                        }
-                    }
-
-                } else if (!atIndex.equals(EMPTY)) {
-                    if (atIndex.equals(curHorizChars[nTwo])) {
-                        horizCounts[nTwo]++;
-                        if (rVal.containsKey(atIndex)) {
-                            if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
-                                rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
-                            }
-                        }
-                    }
-                    else{
-                        horizCounts[nTwo] = 0;
-                        curHorizChars[nTwo] = atIndex;
-                    }
-
-                    if (horizCounts[nTwo] >= _goal - 1){
-                        BoardMessage = "Horiz: " + nTwo + " Winner! Player \'" + atIndex + "\'";
-                        _isComplete = true;
-                    }
-                } else {
-                    horizCounts[nTwo] = 0;
-                    curHorizChars[nTwo] = atIndex;
-                }
-
-                if (nTwo == 0) {
-                    // Reset the column and row counts
-                    curVertChars[nOne] = atIndex;
-
-                    vertCounts[nOne] = 1;
-                    if (rVal.containsKey(atIndex)) {
-                        if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
-                            rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
-                        }
-                    }
-
-                } else if (!atIndex.equals(EMPTY)) {
-                    if (atIndex.equals(curVertChars[nOne])){
-                        vertCounts[nOne]++;
-                        if (rVal.containsKey(atIndex)) {
-                            if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
-                                rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
-                            }
-                        }
-                    } else {
-                        vertCounts[nOne] = 0;
-                        curVertChars[nOne] = atIndex;
-                    }
-
-                    if (vertCounts[nOne] >= _goal - 1){
-                        BoardMessage = "Vert: " + nOne + " Winner! Player \'" + atIndex + "\'";
-                        _isComplete = true;
-                    }
-                } else {
-                    vertCounts[nOne] = 0;
-                    curVertChars[nOne] = atIndex;
-                }
-
-                // Handle the diagonals
+                // Diagonal indicies
                 int clockwiseDiagonalIndex = (_n-1) + (nOne - nTwo);
                 int countercwDiagonalIndex = (nOne + nTwo);
 
                 int clockwiseCharArrayIndex = (clockwiseDiagonalIndex < _n) ? nOne : nTwo;
                 int countercwCharArrayIndex = (countercwDiagonalIndex < _n) ? nOne : (_n-1) - nTwo;
 
+                // Handle zero indicies
+                if (nOne == 0) {
+                    curHorizChars[nTwo] = atIndex;
+                    horizCounts[nTwo] = 0;
+                }
+                if (nTwo == 0) {
+                    // Reset the column count to 1
+                    curVertChars[nOne] = atIndex;
+                    vertCounts[nOne] = 0;
+                }
                 if (clockwiseCharArrayIndex == 0) {
                     diagCWChars[clockwiseDiagonalIndex] = atIndex;
-                    diagClockwiseCounts[clockwiseDiagonalIndex] = 1;
+                    diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                }
+                if (countercwCharArrayIndex == 0) {
+                    diagCCWChars[countercwDiagonalIndex] = atIndex;
+                    diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                }
+
+                // Rows
+                if (atIndex.equals(curHorizChars[nTwo])) {
+                    horizCounts[nTwo]++;
+                    if (rVal.containsKey(atIndex)) {
+                        if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
+                            rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
+                        }
+                    }
+                }
+                else{
+                    horizCounts[nTwo] = 1;
+                    curHorizChars[nTwo] = atIndex;
+                }
+
+                if (horizCounts[nTwo] >= _goal && !curHorizChars[nTwo].equals(EMPTY)){
+                    BoardMessage = "Horiz: " + nTwo + " Winner! Player \'" + atIndex + "\'";
+                    _isComplete = true;
+                }
+
+                // Columns
+                if (atIndex.equals(curVertChars[nOne])){
+                    vertCounts[nOne]++;
+                    if (rVal.containsKey(atIndex)) {
+                        if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
+                            rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
+                        }
+                    }
+                } else {
+                    vertCounts[nOne] = 1;
+                    curVertChars[nOne] = atIndex;
+                }
+
+                if (vertCounts[nOne] >= _goal && !curVertChars[nOne].equals(EMPTY)){
+                    BoardMessage = "Vert: " + nOne + " Winner! Player \'" + atIndex + "\'";
+                    _isComplete = true;
+                }
+                
+                // Diagonal down
+                if (atIndex.equals(diagCWChars[clockwiseDiagonalIndex])) {
+                    diagClockwiseCounts[clockwiseDiagonalIndex]++;
                     if (rVal.containsKey(atIndex)) {
                         if (diagClockwiseCounts[clockwiseDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex]) {
                             rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex] = diagClockwiseCounts[clockwiseDiagonalIndex];
                         }
                     }
-                } else if (!atIndex.equals(EMPTY)) {
-                    if (atIndex.equals(diagCWChars[clockwiseDiagonalIndex])) {
-                        diagClockwiseCounts[clockwiseDiagonalIndex]++;
-                        if (rVal.containsKey(atIndex)) {
-                            if (diagClockwiseCounts[clockwiseDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex]) {
-                                rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex] = diagClockwiseCounts[clockwiseDiagonalIndex];
-                            }
-                        }
-                    } else {
-                        diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
-                        diagCWChars[clockwiseDiagonalIndex] = atIndex;
-                    }
-
-                    if (diagClockwiseCounts[clockwiseDiagonalIndex] >= _goal - 1) {
-                        BoardMessage = "DC: " + clockwiseDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
-                        _isComplete = true;
-                    }
                 } else {
-                    diagClockwiseCounts[clockwiseDiagonalIndex] = 0;
+                    diagClockwiseCounts[clockwiseDiagonalIndex] = 1;
                     diagCWChars[clockwiseDiagonalIndex] = atIndex;
                 }
 
-                if (countercwCharArrayIndex == 0) {
-                    diagCCWChars[countercwDiagonalIndex] = atIndex;
-                    diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                if (diagClockwiseCounts[clockwiseDiagonalIndex] >= _goal && !diagCWChars[clockwiseDiagonalIndex].equals(EMPTY)) {
+                    BoardMessage = "DC: " + clockwiseDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
+                    _isComplete = true;
+                }
+                
+                // Diagonal up
+                if (atIndex.equals(diagCCWChars[countercwDiagonalIndex])) {
+                    diagCClockwiseCounts[countercwDiagonalIndex]++;
                     if (rVal.containsKey(atIndex)) {
                         if (diagCClockwiseCounts[countercwDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex]) {
                             rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex] = diagCClockwiseCounts[countercwDiagonalIndex];
                         }
                     }
-                } else if (!atIndex.equals(EMPTY)) {
-                    if (atIndex.equals(diagCCWChars[countercwDiagonalIndex])) {
-                        diagCClockwiseCounts[countercwDiagonalIndex]++;
-                        if (rVal.containsKey(atIndex)) {
-                            if (diagCClockwiseCounts[countercwDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex]) {
-                                rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex] = diagCClockwiseCounts[countercwDiagonalIndex];
-                            }
-                        }
-                    } else {
-                        diagCClockwiseCounts[countercwDiagonalIndex] = 0;
-                        diagCCWChars[countercwDiagonalIndex] = atIndex;
-                    }
-
-                    if (diagCClockwiseCounts[countercwDiagonalIndex] >= _goal - 1) {
-                        BoardMessage = "DCC: " + countercwDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
-                        _isComplete = true;
-                    }
                 } else {
-                    diagCClockwiseCounts[countercwDiagonalIndex] = 0;
+                    diagCClockwiseCounts[countercwDiagonalIndex] = 1;
                     diagCCWChars[countercwDiagonalIndex] = atIndex;
+                }
+
+                if (diagCClockwiseCounts[countercwDiagonalIndex] >= _goal && !diagCCWChars[countercwDiagonalIndex].equals(EMPTY)) {
+                    BoardMessage = "DCC: " + countercwDiagonalIndex + " Winner! Player \'" + atIndex + "\'";
+                    _isComplete = true;
                 }
             }
         }

@@ -37,4 +37,4 @@ rm src/package/*
 
 # Start program
 #echo "Starting program"
-java -jar ConnectM.jar
+java -jar ConnectM.jar 10 4 0

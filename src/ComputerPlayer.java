@@ -8,6 +8,7 @@ public class ComputerPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
+    private static final int MAX_DEPTH = 5;
     //endregion
 
     //region Constructor
@@ -95,8 +96,8 @@ public class ComputerPlayer implements IPlayer {
             List<Integer> bestMoves = new ArrayList<>();
 
             // Initialize alpha and beta
-            Double alpha = Double.MIN_VALUE;
-            Double beta = Double.MAX_VALUE;
+            double alpha = Util.VerySmall;
+            double beta = Util.VeryLarge;
 
             // Get available moves
             int[] availableMoves = _initialState.getAvailableMoves();
@@ -109,7 +110,7 @@ public class ComputerPlayer implements IPlayer {
 
                 // Create new node with this action
                 Node newNode = new Node(_headNode, new Action(i));
-                Double aPrime = minValue(newNode, alpha, beta);
+                double aPrime = minValue(newNode, alpha, beta, MAX_DEPTH);
 
                 if (Math.abs(aPrime - alpha) <= Util.Epsilon) {
                     alpha = aPrime;
@@ -127,13 +128,13 @@ public class ComputerPlayer implements IPlayer {
         /**
          * Recursive min call
          */
-        Double minValue(Node node, double alpha, double beta) {
+        double minValue(Node node, double alpha, double beta, int depth) {
             Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
             Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
-            Double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
 
             // Handle game completion
-            if (isComplete.getRef())
+            if (isComplete.getRef() || depth == 0)
                 return nodeUtil;
 
             for (int i = 0; i < availMoves.getRef().length; i ++) {
@@ -141,9 +142,9 @@ public class ComputerPlayer implements IPlayer {
                     continue;
 
                 Node newNode = new Node(node, new Action(i));
-                beta = Math.min(beta, maxValue (newNode, alpha, beta));
+                beta = Math.min(beta, maxValue (newNode, alpha, beta, depth - 1));
                 if (alpha >= beta){
-                    return Double.MIN_VALUE;
+                    return Util.VerySmall;
                 }
             }
             return beta;
@@ -152,13 +153,13 @@ public class ComputerPlayer implements IPlayer {
         /**
          * Recursive max call
          */
-        Double maxValue(Node node, Double alpha, Double beta) {
+        double maxValue(Node node, double alpha, double beta, int depth) {
             Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
             Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
-            Double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
 
             // Handle game completion
-            if (isComplete.getRef())
+            if (isComplete.getRef() || depth == 0)
                 return nodeUtil;
 
             for (int i = 0; i < availMoves.getRef().length; i ++) {
@@ -166,9 +167,9 @@ public class ComputerPlayer implements IPlayer {
                     continue;
                     
                 Node newNode = new Node(node, new Action(i));
-                alpha = Math.max(alpha, minValue(newNode, alpha, beta));
+                alpha = Math.max(alpha, minValue(newNode, alpha, beta, depth - 1));
                 if (alpha >= beta){
-                    return Double.MAX_VALUE;
+                    return Util.VeryLarge;//Double.MAX_VALUE;
                 }
             }
             return alpha;    

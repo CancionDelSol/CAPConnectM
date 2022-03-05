@@ -12,4 +12,6 @@ public class Util {
         }
     }
     public static final double Epsilon = 1E-8;
+    public static final double VerySmall = -1E8;
+    public static final double VeryLarge = 1E8;
 }
