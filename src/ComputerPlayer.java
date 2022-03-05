@@ -8,7 +8,7 @@ public class ComputerPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
-    private static final int MAX_DEPTH = 1;
+    private static final int MAX_DEPTH = 3;
     //endregion
 
     //region Constructor
@@ -134,7 +134,7 @@ public class ComputerPlayer implements IPlayer {
         double minValue(Node node, double alpha, double beta, int depth) {
             Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
             Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
-            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete, depth + 1);
 
             // Handle game completion
             if (isComplete.getRef() || depth == 0)
@@ -159,7 +159,7 @@ public class ComputerPlayer implements IPlayer {
         double maxValue(Node node, double alpha, double beta, int depth) {
             Util.RefSupport<int[]> availMoves = new Util.RefSupport<int[]>(null);
             Util.RefSupport<Boolean> isComplete = new Util.RefSupport<>(false);
-            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete);
+            double nodeUtil = EvaluateNodeUtility(node, _player, availMoves, isComplete, depth + 1);
 
             // Handle game completion
             if (isComplete.getRef() || depth == 0)
@@ -183,7 +183,11 @@ public class ComputerPlayer implements IPlayer {
          *  action deltas along the tree and evaluate
          *  the new state's utility. 
          */
-        double EvaluateNodeUtility(Node node, IPlayer player, Util.RefSupport<int[]> availMoves, Util.RefSupport<Boolean> isComplete) {
+        double EvaluateNodeUtility(Node node,
+            IPlayer player,
+            Util.RefSupport<int[]> availMoves,
+            Util.RefSupport<Boolean> isComplete,
+            double scale) {
             IPlayer opponent = null;
             for (IPlayer p : _initialState.getPlayers()) {
                 if (p.getPlayerCharacter() != _player.getPlayerCharacter()) {
@@ -299,7 +303,7 @@ public class ComputerPlayer implements IPlayer {
                 return Util.VerySmall;
 
             // Return utility
-            return sig(sum/((double)count)) + (maxPlayer - (maxOpponent * 5));
+            return sig(sum/((double)count)) + (maxPlayer/goal - (maxOpponent/goal * scale * 5.0));
         }
 
         /**
