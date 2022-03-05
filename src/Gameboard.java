@@ -131,7 +131,7 @@ public class Gameboard {
         return PlacePlayerPiece(column, player, true);
     }
     public boolean PlacePlayerPiece(int column, IPlayer player, boolean updateMoves) {
-        if (column < 0)
+        if (column < 0 || column >= _n)
             return false;
             
         // Get the largest available row
@@ -234,7 +234,11 @@ public class Gameboard {
                 // Rows
                 if (atIndex.equals(curHorizChars[nTwo])) {
                     horizCounts[nTwo]++;
-                    if (rVal.containsKey(atIndex)) {
+
+                    Character openLeftCharacter = GetAtIndex(nOne - horizCounts[nTwo], nTwo);
+                    Character openRightCharacter = GetAtIndex(nOne + 1, nTwo);
+
+                    if (rVal.containsKey(atIndex) && (openLeftCharacter.equals(EMPTY) || openRightCharacter.equals(EMPTY)) ) {
                         if (horizCounts[nTwo] > rVal.get(atIndex).get(Directionality.Horizontal)[nTwo]) {
                             rVal.get(atIndex).get(Directionality.Horizontal)[nTwo] = horizCounts[nTwo];
                         }
@@ -253,7 +257,10 @@ public class Gameboard {
                 // Columns
                 if (atIndex.equals(curVertChars[nOne])){
                     vertCounts[nOne]++;
-                    if (rVal.containsKey(atIndex)) {
+
+                    Character openLeftCharacter = GetAtIndex(nOne, nTwo - vertCounts[nOne]);
+
+                    if (rVal.containsKey(atIndex) && openLeftCharacter.equals(EMPTY)) {
                         if (vertCounts[nOne] > rVal.get(atIndex).get(Directionality.Vertical)[nOne]) {
                             rVal.get(atIndex).get(Directionality.Vertical)[nOne] = vertCounts[nOne];
                         }
@@ -271,7 +278,11 @@ public class Gameboard {
                 // Diagonal down
                 if (atIndex.equals(diagCWChars[clockwiseDiagonalIndex])) {
                     diagClockwiseCounts[clockwiseDiagonalIndex]++;
-                    if (rVal.containsKey(atIndex)) {
+
+                    Character openLeftCharacter = GetAtIndex(nOne - diagClockwiseCounts[clockwiseDiagonalIndex], nTwo - diagClockwiseCounts[clockwiseDiagonalIndex]);
+                    Character openRightCharacter = GetAtIndex(nOne + 1, nTwo + 1);
+
+                    if (rVal.containsKey(atIndex) && (openLeftCharacter.equals(EMPTY) || openRightCharacter.equals(EMPTY))) {
                         if (diagClockwiseCounts[clockwiseDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex]) {
                             rVal.get(atIndex).get(Directionality.DiagonalDown)[clockwiseDiagonalIndex] = diagClockwiseCounts[clockwiseDiagonalIndex];
                         }
@@ -289,7 +300,11 @@ public class Gameboard {
                 // Diagonal up
                 if (atIndex.equals(diagCCWChars[countercwDiagonalIndex])) {
                     diagCClockwiseCounts[countercwDiagonalIndex]++;
-                    if (rVal.containsKey(atIndex)) {
+
+                    Character openLeftCharacter = GetAtIndex(nOne - diagCClockwiseCounts[countercwDiagonalIndex], nTwo + diagCClockwiseCounts[countercwDiagonalIndex]);
+                    Character openRightCharacter = GetAtIndex(nOne + 1, nTwo - 1);
+
+                    if (rVal.containsKey(atIndex) && (openLeftCharacter.equals(EMPTY) || openRightCharacter.equals(EMPTY))) {
                         if (diagCClockwiseCounts[countercwDiagonalIndex] > rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex]) {
                             rVal.get(atIndex).get(Directionality.DiagonalUp)[countercwDiagonalIndex] = diagCClockwiseCounts[countercwDiagonalIndex];
                         }
@@ -323,6 +338,9 @@ public class Gameboard {
      * @return character at index (x, y)
      */
     public Character GetAtIndex(int x, int y) {
+        if (x < 0 || x >= _n || y < 0 || y >= _n)
+            return 'N';
+            
         return _board[y*_n + x];
     }
 

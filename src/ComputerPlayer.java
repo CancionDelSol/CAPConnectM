@@ -8,7 +8,7 @@ public class ComputerPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
-    private static final int MAX_DEPTH = 5;
+    private static final int MAX_DEPTH = 1;
     //endregion
 
     //region Constructor
@@ -81,8 +81,8 @@ public class ComputerPlayer implements IPlayer {
 
         Graph(Gameboard currentState, IPlayer player) {
             _initialState = currentState;
-            _headNode = new Node(null, null);
             _player = player;
+            _headNode = new Node(null, null);
         }
 
         /**
@@ -121,6 +121,9 @@ public class ComputerPlayer implements IPlayer {
                     bestMoves.add(i);
                 }
             }
+
+            if (bestMoves.size() == 0)
+                return _rand.nextInt(_initialState.getN());
 
             return bestMoves.get(_rand.nextInt(bestMoves.size()));
         }
@@ -209,6 +212,7 @@ public class ComputerPlayer implements IPlayer {
 
             // Clone Gameboard and place moves
             Gameboard sandbox = (Gameboard)_initialState.clone();
+
             int flip = 0;
             for (Action action : actions) {
                 boolean placementRes = flip == 0 ? sandbox.PlacePlayerPiece(action.COLUMN, player, false) : sandbox.PlacePlayerPiece(action.COLUMN, opponent, false);
@@ -239,40 +243,72 @@ public class ComputerPlayer implements IPlayer {
             double goal = (double)_initialState.getGoal();
             HashMap<Character, HashMap<Gameboard.Directionality, int[]>> stats = sandbox.getStats();
 
-            // Over Verticals
+            // Get the set counts
             int[] verticalPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.Vertical);
             int[] verticalOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.Vertical);
-            for (int i = 0; i < verticalPlayerSet.length; i++) {
-                count++;
-                sum += verticalPlayerSet[i]/goal + (1.0 - (verticalOpponentSet[i]/goal));
-            }
-
-            // Over Horizontals
             int[] horizPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.Horizontal);
             int[] horizOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.Horizontal);
-            for (int i = 0; i < horizPlayerSet.length; i++) {
-                count++;
-                sum += horizPlayerSet[i]/goal + (1.0 - (horizOpponentSet[i]/goal));
-            }
-
-            // Over Diagonalup
             int[] diagUpPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalUp);
             int[] diagUpOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalUp);
-            for (int i = 0; i < diagUpPlayerSet.length; i++) {
-                count++;
-                sum += diagUpPlayerSet[i]/goal + (1.0 - (diagUpOpponentSet[i]/goal));
-            }
-
-            // Over Diagonaldown
             int[] diagDownPlayerSet = stats.get(_player.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalDown);
             int[] diagDownOpponentSet = stats.get(opponent.getPlayerCharacter()).get(Gameboard.Directionality.DiagonalDown);
-            for (int i = 0; i < diagDownPlayerSet.length; i++) {
-                count++;
-                sum += diagDownPlayerSet[i]/goal + (1.0 - (diagDownOpponentSet[i]/goal));
+
+            // Max counts
+            int maxPlayer = 0;
+            int maxOpponent = 0;
+
+            // Over Verticals and horizontals
+            for (int i = 0; i < _initialState.getN(); i++) {
+                count += 2;
+                sum += verticalPlayerSet[i]/goal + (1.0 - (verticalOpponentSet[i]/goal));
+                sum += horizPlayerSet[i]/goal + (1.0 - (horizOpponentSet[i]/goal));
+
+                if (verticalPlayerSet[i] > maxPlayer) 
+                    maxPlayer = verticalPlayerSet[i];
+                if (horizPlayerSet[i] > maxPlayer)
+                    maxPlayer = horizPlayerSet[i];
+
+                if (verticalOpponentSet[i] > maxOpponent)
+                    maxOpponent = verticalOpponentSet[i];
+                if (horizOpponentSet[i] > maxOpponent)
+                    maxOpponent = horizOpponentSet[i];
             }
 
+
+            // Over Diagonals
+            for (int i = 0; i < diagUpPlayerSet.length; i++) {
+                count += 2;
+                sum += diagUpPlayerSet[i]/goal + (1.0 - (diagUpOpponentSet[i]/goal));
+                sum += diagDownPlayerSet[i]/goal + (1.0 - (diagDownOpponentSet[i]/goal));
+                if (diagDownPlayerSet[i] > maxPlayer)
+                    maxPlayer = diagDownPlayerSet[i];
+                if (diagUpPlayerSet[i] > maxPlayer)
+                    maxPlayer = diagUpPlayerSet[i];
+
+                if (diagDownOpponentSet[i] > maxOpponent)
+                    maxOpponent = diagDownOpponentSet[i];
+                if (diagUpOpponentSet[i] > maxOpponent)
+                    maxOpponent = diagUpOpponentSet[i];
+                
+            }
+
+            if (maxPlayer >= _initialState.getGoal())
+                return Util.VeryLarge;
+
+            if (maxOpponent >= _initialState.getGoal())
+                return Util.VerySmall;
+
             // Return utility
-            return sum/((double)count);
+            return sig(sum/((double)count)) + (maxPlayer - (maxOpponent * 5));
+        }
+
+        /**
+         * Return a value between -1 and 1
+         * @param x
+         * @return
+         */
+        private double sig(double x) {
+            return (1.0/(1.0 + Math.exp(-x)) * 2.0) - 1.0;
         }
     }
 }
