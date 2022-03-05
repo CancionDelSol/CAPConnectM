@@ -185,8 +185,6 @@ public class Program {
                     
                     invalidCounter++;
                     
-                    // Just for debugging, remove before submission
-                    System.out.println("Recieved move: " + res + " from player: " + (player.getPlayerCharacter()));
                 } while (!_gameBoard.PlacePlayerPiece(res, player));
                 
                 invalidCounter = 0;

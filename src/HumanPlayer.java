@@ -20,10 +20,15 @@ public class HumanPlayer implements IPlayer {
         
         System.out.println("Which column would you like to select as your move?");
         
-        return sc.nextInt();
-    	
-    	
-    	
+        int input = -1;
+
+        try {
+            input = sc.nextInt();
+        } catch (Exception exc) {
+
+        }
+
+        return input;
     }
 
     /**
