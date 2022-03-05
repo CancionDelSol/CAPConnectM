@@ -31,13 +31,21 @@ public class Gameboard {
     //endregion
 
     //region Properties
-    public int[] getAvailableMoves() { return _availableColumns; }
+    public int[] getAvailableMoves() {
+        int[] rVal = new int[_availableColumns.length];
+        for (int i = 0; i < rVal.length; i++) {
+            rVal[i] = _availableColumns[i];
+        }
+        return rVal;
+    }
     
     public char[] getBoard() { return _board; }
 
     public boolean getIsComplete() { return _isComplete; }
 
-    public HashMap<Character, HashMap<Directionality, int[]>> getStats() { return _stats; }
+    public HashMap<Character, HashMap<Directionality, int[]>> getStats() {
+        return (HashMap<Character, HashMap<Directionality, int[]>>)_stats.clone();
+    }
 
     /**
      * Return the last move by player
@@ -120,6 +128,9 @@ public class Gameboard {
      * Origin starting in the top left corner
      */
     public boolean PlacePlayerPiece(int column, IPlayer player) {
+        return PlacePlayerPiece(column, player, true);
+    }
+    public boolean PlacePlayerPiece(int column, IPlayer player, boolean updateMoves) {
         if (column < 0)
             return false;
             
@@ -128,7 +139,8 @@ public class Gameboard {
             int index = (_n * yIndex) + column;
             if (_board[index] == ' ') {
                 _board[index] = player.getPlayerCharacter();
-                _recentMoves.put(player.getPlayerCharacter(), column);
+                if (updateMoves)
+                    _recentMoves.put(player.getPlayerCharacter(), column);
                 return true;
             }
         }

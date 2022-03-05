@@ -211,7 +211,7 @@ public class ComputerPlayer implements IPlayer {
             Gameboard sandbox = (Gameboard)_initialState.clone();
             int flip = 0;
             for (Action action : actions) {
-                boolean placementRes = flip == 0 ? sandbox.PlacePlayerPiece(action.COLUMN, player) : sandbox.PlacePlayerPiece(action.COLUMN, opponent);
+                boolean placementRes = flip == 0 ? sandbox.PlacePlayerPiece(action.COLUMN, player, false) : sandbox.PlacePlayerPiece(action.COLUMN, opponent, false);
                 if (!placementRes)
                     break;
             }
