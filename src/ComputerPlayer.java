@@ -8,7 +8,8 @@ public class ComputerPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
-    private static final int MAX_DEPTH = 3;
+    private static final int MAX_DEPTH = 2;
+    private static final double DIFFICULTY = 5.0;
     //endregion
 
     //region Constructor
@@ -297,13 +298,13 @@ public class ComputerPlayer implements IPlayer {
             }
 
             if (maxPlayer >= _initialState.getGoal())
-                return Util.VeryLarge;
+                return Util.VeryLarge * (scale + 1);
 
             if (maxOpponent >= _initialState.getGoal())
-                return Util.VerySmall;
+                return Util.VerySmall * (scale + 1);
 
             // Return utility
-            return sig(sum/((double)count)) + (maxPlayer/goal - (maxOpponent/goal * scale * 5.0));
+            return sig(sum/((double)count)) + (maxPlayer/goal - (maxOpponent/goal * scale * DIFFICULTY));
         }
 
         /**
