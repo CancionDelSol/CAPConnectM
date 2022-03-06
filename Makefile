@@ -35,7 +35,6 @@ generate: createjar
 
 run: generate
 	@java -jar ConnectM.jar 10 4 1
-	@rm -r bin
 
 clean:
 	@echo "Cleaning up..."
