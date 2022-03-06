@@ -4,12 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The computer player class uses Min-Max and 
+ *  Alpha-Beta pruning to return the best move
+ *  when requested.
+ */
 public class ComputerPlayer implements IPlayer {
     //region Fields
     private static Random _rand = new Random();
     private char _playerCharacter = 'X';
-    private static final int MAX_DEPTH = 2;
-    private static final double DIFFICULTY = 5.0;
+    private static final int MAX_DEPTH = 3;
+    private static final double DIFFICULTY = 10.0;
     //endregion
 
     //region Constructor
@@ -41,6 +46,10 @@ public class ComputerPlayer implements IPlayer {
     //endregion
 
     //region Alpha-Beta
+    /**
+     * Action class only stores
+     *  the column-action
+     */
     class Action {
         public int COLUMN = -1;
         Action(int column) {
@@ -48,6 +57,11 @@ public class ComputerPlayer implements IPlayer {
         }
     }
 
+    /**
+     * Node class contains references
+     *  to the associated action, parent node
+     *  and a list of child nodes
+     */
     class Node {
         private Action _delta = null;
         private Node _parent = null;
@@ -75,6 +89,10 @@ public class ComputerPlayer implements IPlayer {
         }
     }
 
+    /**
+     * The graph class implements the
+     *  Min-Max and Alpha-Beta algorithms
+     */
     class Graph {
         private Gameboard _initialState = null;
         private Node _headNode = null;
@@ -93,7 +111,6 @@ public class ComputerPlayer implements IPlayer {
          */
         int EvaluateBestMove() {
             // Return column action
-            int rVal = -1;
             List<Integer> bestMoves = new ArrayList<>();
 
             // Initialize alpha and beta
@@ -173,7 +190,7 @@ public class ComputerPlayer implements IPlayer {
                 Node newNode = new Node(node, new Action(i));
                 alpha = Math.max(alpha, minValue(newNode, alpha, beta, depth - 1));
                 if (alpha >= beta){
-                    return Util.VeryLarge;//Double.MAX_VALUE;
+                    return Util.VeryLarge;
                 }
             }
             return alpha;    
@@ -298,10 +315,10 @@ public class ComputerPlayer implements IPlayer {
             }
 
             if (maxPlayer >= _initialState.getGoal())
-                return Util.VeryLarge * (scale + 1);
+                return Util.VeryLarge * (scale);
 
             if (maxOpponent >= _initialState.getGoal())
-                return Util.VerySmall * (scale + 1);
+                return Util.VerySmall * (scale * DIFFICULTY);
 
             // Return utility
             return sig(sum/((double)count)) + (maxPlayer/goal - (maxOpponent/goal * scale * DIFFICULTY));
@@ -309,8 +326,6 @@ public class ComputerPlayer implements IPlayer {
 
         /**
          * Return a value between -1 and 1
-         * @param x
-         * @return
          */
         private double sig(double x) {
             return (1.0/(1.0 + Math.exp(-x)) * 2.0) - 1.0;

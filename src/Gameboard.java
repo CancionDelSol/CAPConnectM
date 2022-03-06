@@ -43,6 +43,10 @@ public class Gameboard {
 
     public boolean getIsComplete() { return _isComplete; }
 
+    /**
+     * Return a copy of the statistics of the current
+     *  state
+     */
     public HashMap<Character, HashMap<Directionality, int[]>> getStats() {
         return (HashMap<Character, HashMap<Directionality, int[]>>)_stats.clone();
     }
@@ -54,11 +58,23 @@ public class Gameboard {
     public HashMap<Character, Integer> getLastMoves() {
         return _recentMoves;
     }
+
+    /**
+     * Return the goal chain length
+     */
     public int getGoal() { return _goal; }
+
+    /**
+     * Return the gird dimension
+     */
     public int getN() { return _n; }
     //endregion
 
     //region Constructor
+    /**
+     * Construct a gameboard with 
+     *  n side length and goal m
+     */
     public Gameboard(int n, int m) {
         _board = new char[n*n];
         _availableColumns = new int[n];
@@ -77,15 +93,25 @@ public class Gameboard {
     //endregion
 
     //region Methods
+    /**
+     * Return the currently registered players
+     */
     public List<IPlayer> getPlayers() {
         return _registeredPlayers;
     }
     
+    /**
+     * Register a player with the gameboard
+     * @param player
+     */
     public void RegisterPlayer(IPlayer player) {
         if (!_registeredPlayers.contains(player))
             _registeredPlayers.add(player);
     }
 
+    /**
+     * Clear the board
+     */
     public void ClearBoard() {
         for (int i = 0; i < _n*_n; i++) {
             _board[i] = EMPTY;

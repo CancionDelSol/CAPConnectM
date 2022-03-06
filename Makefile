@@ -34,7 +34,7 @@ generate: createjar
 	@echo "Complete: Run make run to execute a standard Connect 4 game"
 
 run: generate
-	@java -jar ConnectM.jar 10 4 0
+	@java -jar ConnectM.jar 10 4 1
 	@rm -r bin
 
 clean:

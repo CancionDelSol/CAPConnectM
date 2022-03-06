@@ -154,12 +154,18 @@ public class Program {
         return true;
     }
 
+    /**
+     * Game loop
+     *  Request moves from 
+     */
     private static void GameLoop() {
         // Register players with gameboard
         //  and evaluate stats
         _gameBoard.RegisterPlayer(_playerOne);
         _gameBoard.RegisterPlayer(_playerTwo);
         _gameBoard.EvaluateStatistics();
+
+        _gameBoard.DisplayGameBoard();
 
         // Start game loop
         do {
